@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Health Navigator: Your Guide to Diseases and Procedures</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script>
+        const baseUrl = 'http://127.0.0.1:5000';
+
+        async function fetchData(endpoint) {
+            const response = await fetch(baseUrl + endpoint);
+            const data = await response.json();
+            return data;
+        }
+
+        function formatJson(data) {
+            if (Array.isArray(data)) {
+                return data.map(formatItem).join('<hr>');
+            } else if (typeof data === 'object') {
+                return formatItem(data);
+            } else {
+                return '<div class="no-data">No additional information is available.</div>';
+            }
+        }
+
+        function formatItem(item) {
+            let formatted = `<div class="item"><strong>Primary Name:</strong> ${item.primary_name || '<span class="no-data">No Data Available</span>'}<br>`;
+            formatted += `<strong>Consumer Name:</strong> ${item.consumer_name || '<span class="no-data">No Data Available</span>'}<br>`;
+            formatted += `<strong>Synonyms:</strong> ${item.synonyms ? item.synonyms.join(', ') : '<span class="no-data">No Data Available</span>'}<br>`;
+            formatted += `<strong>Type:</strong> ${item.is_procedure ? 'Procedure' : 'Disease'}<br>`;
+            if (item.info_link_data) {
+                formatted += `<strong>Additional Information:</strong> <a href="${item.info_link_data}" target="_blank">${item.info_link_data}</a>`;
+            } else {
+                formatted += '<span class="no-data">No additional information is available.</span>';
+            }
+            formatted += `</div>`;
+            return formatted;
+        }
+
+        async function displayHome() {
+            const data = await fetchData('/');
+            document.getElementById('content').innerHTML = formatJson(data);
+        }
+
+        async function displayInfo() {
+            const keyId = document.getElementById('keyId').value;
+            const data = await fetchData(`/info/${keyId}`);
+            document.getElementById('content').innerHTML = formatJson(data);
+        }
+
+        async function displaySearch() {
+            const query = document.getElementById('query').value;
+            const data = await fetchData(`/search?query=${query}`);
+            document.getElementById('content').innerHTML = formatJson(data);
+        }
+
+        async function displayCategories() {
+            const data = await fetchData('/categories');
+            document.getElementById('content').innerHTML = formatJson(data);
+        }
+
+        async function displayAll() {
+            const data = await fetchData('/all');
+            document.getElementById('content').innerHTML = formatJson(data);
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Health Navigator: Your Guide to Diseases and Procedures</h1>
+        <div class="buttons">
+            <button onclick="displayHome()">Home</button>
+            <button onclick="displayCategories()">Categories</button>
+            <button onclick="displayAll()">All Data</button>
+        </div>
+        <div class="input-group">
+            <input type="text" id="keyId" placeholder="Enter key_id">
+            <button onclick="displayInfo()">Get Info</button>
+        </div>
+        <div class="input-group">
+            <input type="text" id="query" placeholder="Enter search query">
+            <button onclick="displaySearch()">Search</button>
+        </div>
+        <div id="content" class="content"></div>
+    </div>
+</body>
+</html>
