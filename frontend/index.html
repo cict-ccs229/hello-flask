@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symptom Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center h-screen bg-no-repeat bg-center bg-gray-900"
+      style="background-image: url('/static/nurse_logo.png'); background-size: contain;">
+
+
+    <div class="bg-white shadow-lg rounded-lg p-8 w-96">
+        <h2 class="text-2xl font-bold text-center mb-4">Enter a Symptom</h2>
+        <form action="/" method="post" class="flex flex-col space-y-4">
+            <input 
+                type="text" 
+                name="symptom" 
+                placeholder="Fever, Cough, etc." 
+                required
+                class="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+            <button 
+                type="submit" 
+                class="bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition">
+                Search
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>
