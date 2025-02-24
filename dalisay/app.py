@@ -7,8 +7,11 @@ from google import genai
 def create_app():
   app = Flask(__name__)
 
-  env = dotenv_values(os.path.join(os.getcwd(), ".env"))
-  client = genai.Client(api_key=env["GENAI_API_KEY"])
+  if (os.path.exists(os.path.join(os.getcwd(), ".env"))):
+    env = dotenv_values(os.path.join(os.getcwd(), ".env"))
+    client = genai.Client(api_key=env["GENAI_API_KEY"])
+  else:
+    client = genai.Client(api_key=os.environ.get("GENAI_API_KEY"))
 
   icd_9_file = os.path.join(os.getcwd(), 'diseases.json') # This is meant to be run from the root directory
   icd_9_json = open(icd_9_file).read()
