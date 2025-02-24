@@ -13,7 +13,7 @@ def create_app():
   else:
     client = genai.Client(api_key=os.environ.get("GENAI_API_KEY"))
 
-  icd_9_file = os.path.join(os.getcwd(), 'diseases.json') # This is meant to be run from the root directory
+  icd_9_file = os.path.join(os.getcwd(), '..', 'diseases.json') # This is meant to be run from the root directory
   icd_9_json = open(icd_9_file).read()
 
   icd_9_arr = json.loads(icd_9_json)
