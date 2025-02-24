@@ -4,10 +4,10 @@ from google import genai
 
 import os, json, re
 
-def main():
+def create_app():
   app = Flask(__name__)
 
-  env = dotenv_values(os.path.join(os.getcwd(), "dalisay/.env"))
+  env = dotenv_values(os.path.join(os.getcwd(), ".env"))
   client = genai.Client(api_key=env["GENAI_API_KEY"])
 
   icd_9_file = os.path.join(os.getcwd(), 'diseases.json') # This is meant to be run from the root directory
@@ -45,7 +45,7 @@ def main():
   def procedures():
     # Returns a list of all procedures
     return icd_9_procedures
-  
+
   @app.route('/procedure/<string:name>')
   def procedure(name):
     # Returns the procedure that matches the name
@@ -54,7 +54,7 @@ def main():
       if re.search(name, procedure, re.IGNORECASE):
         return row
     return 'Procedure not found.'
-  
+
   @app.route('/chat', methods=['POST'])
   def chat():
     # Returns the response from the Gemini 2.0 Flash model
@@ -63,8 +63,7 @@ def main():
     message = data["message"]
     response = client.models.generate_content(model="gemini-2.0-flash", contents=[message])
     return response.text
+  
+  return app
 
-  app.run(port=5000)
-
-if __name__ == '__main__':
-  main()
+api = create_app()
