@@ -11,6 +11,7 @@ json_path = os.path.join(os.path.dirname(__file__), 'diseases.json')
 with open(json_path) as file:
     data = json.load(file)
 
+# defines route for retrieving all diseases and procedures
 @app.route('/')
 def home():
     return jsonify({"message": "Welcome to the Diseases and Procedures API! Use the endpoints below for more details.",
@@ -21,6 +22,7 @@ def home():
                         "/all": "Retrieve all diseases and procedures data."
                     }})
 
+# defines route for retrieving information by key_id
 @app.route('/info/<key_id>', methods=['GET'])
 def get_info(key_id):
     """Fetch information by key_id."""
@@ -30,6 +32,7 @@ def get_info(key_id):
     else:
         return jsonify({"error": "No information found for the given key_id."}), 404
 
+# defines route for searching diseases or procedures by name or keyword
 @app.route('/search', methods=['GET'])
 def search():
     """Search diseases or procedures by primary name, synonyms, or keywords."""
@@ -45,6 +48,7 @@ def search():
     ]
     return jsonify(results if results else {"message": "No results found."})
 
+# defines route finding via categories
 @app.route('/categories', methods=['GET'])
 def list_categories():
     """List unique categories: disease or procedure."""
@@ -54,6 +58,7 @@ def list_categories():
     }
     return jsonify(categories)
 
+# Retrieves all data
 @app.route('/all', methods=['GET'])
 def get_all():
     """Retrieve all diseases and procedures."""
