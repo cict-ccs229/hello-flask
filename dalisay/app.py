@@ -54,6 +54,15 @@ def main():
       if re.search(name, procedure, re.IGNORECASE):
         return row
     return 'Procedure not found.'
+  
+  @app.route('/chat', methods=['POST'])
+  def chat():
+    # Returns the response from the Gemini 2.0 Flash model
+    request.content_length = int(request.headers['Content-Length'])
+    data = request.get_json()
+    message = data["message"]
+    response = client.models.generate_content(model="gemini-2.0-flash", contents=[message])
+    return response.text
 
   app.run(port=5000)
 
