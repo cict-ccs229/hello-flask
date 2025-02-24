@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disease Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: aliceblue;
+}
+        h1 {
+            color: #2C3E50;
+            text-align: center;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 45px;
+            margin-top: 100px;
+        }
+        p {
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+        }
+        a {
+            color: #3498DB;
+            text-decoration: none;
+            
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 80%;
+            margin-right: 10px;
+        }
+        input[type="submit"] {
+            padding: 8px 16px;
+            background-color: #3498DB;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #2980B9;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .pagination a {
+            padding: 8px 16px;
+            margin: 0 5px;
+            background-color: #3498DB;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .pagination a:hover {
+            background-color: #2980B9;
+        }
+        .pagination .active {
+            background-color: #2980B9;
+        }
+        .pagination .disabled {
+            background-color: #BDC3C7;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Welcome!</h1>
+        <p>Use the search bar below to find diseases.</p>
+
+        <!-- Search form -->
+        <form action="/search" method="GET">
+            <input type="text" name="query" value="{{ query or '' }}" placeholder="Enter disease name or keyword" required>
+            <input type="submit" value="Search">
+        </form>
+
+        <ul id="disease-list">
+            {% if diseases %}
+                {% for disease in diseases %}
+                    <li><a href="/disease/{{ disease.key_id }}">{{ disease.primary_name }}</a></li>
+                {% endfor %}
+            {% else %}
+                <li>No diseases found matching your search.</li>
+            {% endif %}
+        </ul>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="?page={{ page - 1 }}" class="prev">🡠 Prev</a>
+            {% endif %}
+
+            {% for page_number in page_numbers %}
+                {% if page_number == '...' %}
+                    <span>...</span>
+                {% else %}
+                    <a href="?page={{ page_number }}" class="{% if page_number == page %}active{% endif %}">{{ page_number }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page < total_pages %}
+                <a href="?page={{ page + 1 }}" class="next">Next 🡢</a>
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+</html>
