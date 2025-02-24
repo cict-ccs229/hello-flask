@@ -1,8 +1,15 @@
-from flask import Flask
+from flask import Flask, request
+from dotenv import dotenv_values
+from google import genai
+
 import os, json, re
 
 def main():
   app = Flask(__name__)
+
+  env = dotenv_values(os.path.join(os.getcwd(), "dalisay/.env"))
+  client = genai.Client(api_key=env["GENAI_API_KEY"])
+
   icd_9_file = os.path.join(os.getcwd(), 'diseases.json') # This is meant to be run from the root directory
   icd_9_json = open(icd_9_file).read()
 
@@ -51,4 +58,4 @@ def main():
   app.run(port=5000)
 
 if __name__ == '__main__':
-    main()
+  main()
