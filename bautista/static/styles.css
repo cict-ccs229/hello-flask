@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Boogaloo&family=Roboto:wght@300;400;700&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    text-align: center;
+    margin: 50px;
+    background-color: #e3f2fd;
+}
+
+.title-container {
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #0d47a1;
+    background-color: #bbdefb;
+    width: 60%;
+    text-align: center;
+    font-size: 1.2em;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+h1 {
+    font-family: 'Boogaloo', cursive;
+    color: #0d47a1;
+    font-size: 2em;
+    margin: 0;
+}
+
+.container {
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #0d47a1;
+    background-color: #bbdefb;
+    width: 60%;
+    text-align: center;
+    font-size: 1em;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+input, button {
+    font-family: 'Roboto', sans-serif;
+    margin: 5px;
+    padding: 8px;
+    border: 1px solid #0d47a1;
+    background-color: #e3f2fd;
+    color: #0d47a1;
+    font-size: 1em;
+}
+
+button {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #64b5f6;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+}
+
+#results {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #0d47a1;
+    background-color: #ffffff;
+    color: #0d47a1;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#results p {
+    font-size: 1em;
+    font-weight: 400;
+}
+
+#disease-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#disease-list li {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: #e3f2fd;
+    padding: 10px;
+    margin: 10px auto;
+    width: 80%;
+    border-radius: 8px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#disease-list li a {
+    text-decoration: none;
+    color: #0d47a1;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    font-size: 1em;
+}
+
+#disease-list li a:hover {
+    text-decoration: underline;
+}
+
+.matched-symptoms {
+    font-size: 0.85em;
+    color: gray;
+    font-style: italic;
+    margin-left: 5px;
+}
+
+.back-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 15px;
+    background-color: #0d47a1;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 0.9em;
+}
+
+.back-button:hover {
+    background-color: #1565c0;
+}
+
+.disease-detail h2 {
+    color: #0d47a1;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+.detail-section {
+    margin: 20px 0;
+    text-align: left;
+    padding: 15px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.detail-section h3 {
+    color: #1565c0;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.synonyms, .symptoms, .description {
+    line-height: 1.6;
+    margin: 0;
+    color: #333;
+}
