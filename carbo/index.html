@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diseases Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 50%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Doogle</h1>
+    <div class="search-container">
+        <form id="searchForm">
+            <input type="text" id="searchQuery" placeholder="Enter disease name, ICD-9 text, or word synonym">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+    <div class="results" id="results"></div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const query = document.getElementById('searchQuery').value.toLowerCase();
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            fetch('/diseases')
+                .then(response => response.json())
+                .then(data => {
+                    const disease = data.find(d => 
+                        d.primary_name.toLowerCase() === query ||
+                        (d.term_icd9_text && d.term_icd9_text.toLowerCase() === query) ||
+                        (d.word_synonyms && d.word_synonyms.toLowerCase().includes(query))
+                    );
+                    if (disease) {
+                        const infoLinks = disease.info_link_data.map(link => `<a href="${link[0]}">${link[1]}</a>`).join('<br>');
+                        resultsDiv.innerHTML = `<h2>Information Links:</h2>${infoLinks}`;
+                    } else {
+                        resultsDiv.innerHTML = '<p>No disease found with that name, ICD-9 text, or word synonym.</p>';
+                    }
+                });
+        });
+    </script>
+</body>
+</html>
