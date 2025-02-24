@@ -1,8 +1,8 @@
+import os, json, re
+
 from flask import Flask, request
 from dotenv import dotenv_values
 from google import genai
-
-import os, json, re
 
 def create_app():
   app = Flask(__name__)
