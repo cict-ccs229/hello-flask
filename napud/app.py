@@ -1,5 +1,23 @@
 from flask import Flask, request, jsonify, render_template
 import json, os
+from dotenv import load_dotenv, dot_env_values
+from google import genai
+from pydantic import BaseModel
+
+
+class Diagnosis(BaseModel):
+    key_id: str
+    primary_name: str
+    consumer_name: str
+    word_synonyms: str
+    synonyms: list[str]
+    info_link_data: list[list[str]]
+
+load_dotenv()
+
+config = dot_env_values(".env")
+
+client = genai.Client(config["API_KEY"])
 
 # initialization
 app = Flask(__name__, template_folder='frontend')
