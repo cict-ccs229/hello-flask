@@ -2,7 +2,16 @@ import os, json, re
 
 from flask import Flask, request
 from dotenv import dotenv_values
+from pydantic import BaseModel
 from google import genai
+
+class Diagnosis(BaseModel):
+  key_id: str
+  primary_name: str
+  consumer_name: str
+  word_synonyms: str
+  synonyms: list[str]
+  info_link_data: list[list[str]]
 
 def create_app():
   app = Flask(__name__)
@@ -66,6 +75,25 @@ def create_app():
     message = data["message"]
     response = client.models.generate_content(model="gemini-2.0-flash", contents=[message])
     return response.text
+  
+  @app.route('/diagnosis', methods=['POST'])
+  def diagnosis():
+    # Returns the top three matching diseases based on the symptoms
+    symptoms = request.get_json()["symptoms"]
+    response = client.models.generate_content(
+      model="gemini-2.0-flash", 
+      contents=[
+        "This is the existing data in JSON format: " + json.dumps(icd_9_diseases),
+        "Match the symptoms to the closest disease based on the data.",
+        "The symptoms are: " + symptoms,
+        "Include the information link data in the response.",
+        "Return the top three matching items."],
+      config = {
+        "response_mime_type": "application/json",
+        "response_schema": list[Diagnosis]},
+      )
+    
+    return json.loads(response.text)
   
   return app
 
