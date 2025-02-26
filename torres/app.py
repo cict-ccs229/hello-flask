@@ -7,18 +7,23 @@ app = Flask(__name__)
 with open("diseases.json", "r") as f:
     diseases_data = json.load(f)
 
+def extract_symptoms(disease):
+    """Extracts symptoms from the word_synonyms field."""
+    if 'word_synonyms' in disease and disease['word_synonyms']:
+        return disease['word_synonyms'].split(';')
+    return []
 
 def search_diseases(query):
     """Searches the diseases data for entries matching the query."""
     results = []
     for disease in diseases_data:
+        symptoms = extract_symptoms(disease)
         if (query.lower() in disease['primary_name'].lower() or
             query.lower() in disease['consumer_name'].lower() or
             any(query.lower() in syn.lower() for syn in disease['synonyms']) or
-            any(query.lower() in symptom.lower() for symptom in disease.get('symptoms', []))):
+            any(query.lower() in symptom.lower() for symptom in symptoms)):
             results.append(disease)
     return results
-
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
@@ -34,14 +39,13 @@ def index():
 
     return render_template('index.html', results=results, query=query)
 
-
 @app.route("/details/<key_id>")
 def details(key_id):
     """Displays details of a specific disease based on key_id."""
     disease = next((d for d in diseases_data if d['key_id'] == key_id), None)
 
     if disease:
-        return render_template('details.html', disease=disease)
+        return render_template('disease.html', disease=disease)
     else:
         return "Disease not found", 404
 

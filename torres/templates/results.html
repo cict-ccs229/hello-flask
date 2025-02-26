@@ -9,16 +9,15 @@
 <body class="flex items-center justify-center h-screen bg-no-repeat bg-center bg-gray-900"
       style="background-image: url('/static/nurse_logo.png'); background-size: contain;">
 
-
     <div class="bg-white shadow-lg rounded-lg p-8 w-96">
         <h2 class="text-2xl font-bold text-center mb-4">Here are the related results</h2>
 
-        {% if matches %}
+        {% if results %}
             <ul class="list-disc pl-5 space-y-2">
-                {% for disease in matches %}
+                {% for disease in results %}
                     <li>
-                        <a href="/disease/{{ disease.key_id }}" class="text-blue-500 hover:underline">
-                            {{ disease.primary_name }}
+                        <a href="{{ url_for('details', key_id=disease['key_id']) }}" class="text-blue-500 hover:underline">
+                            {{ disease['primary_name'] }}
                         </a>
                     </li>
                 {% endfor %}
@@ -27,9 +26,8 @@
             <p class="text-gray-500 text-center">No diseases found with that symptom.</p>
         {% endif %}
 
-    
         <div class="mt-6 text-center">
-            <a href="/" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">
+            <a href="{{ url_for('index') }}" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">
                 Search Again
             </a>
         </div>
