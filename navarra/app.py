@@ -1,6 +1,24 @@
 from flask import Flask, jsonify, redirect, url_for, request, render_template
 import json
 import os
+from google import genai
+from dotenv import load_dotenv, dotenv_values
+from pydantic import BaseModel
+
+class Diagnosis(BaseModel):
+    key_id: str
+    primary_name: str
+    diagnosis: str
+    consumer_name: str
+    word_synonyms: str
+    synonyms: list[str]
+    info_link_data : list[list[str]]
+
+load_dotenv()
+
+config = dotenv_values(".env")
+
+client = genai.Client(config["API_KEY"])
 
 # Load the JSON file
 with open('diseases.json', encoding="utf-8") as file:  # Works cross-platform
@@ -43,6 +61,23 @@ def get_disease(key_id):
     else:
         return "Disease not found", 404
 
+@app.route('/diagnosis', methods=['POST'])
+def diagnosis():
+    symptoms = request.json.get('symptoms', []).lower()
+    response = client.models.generate_content(
+    model="gemini-2.0-flash",
+    contents=[
+        "This is the existing data in JSON format: "+ json.dumps(data),
+        "Match the closest disease with following symptoms: " + symptoms,
+        "Include the info_link_data in the response.",
+        "Return the top three matching items."
+    ],
+    config={
+        "response_mime_type":"application/json",
+        "response_schema": list[Diagnosis]
+    }
+    )
+    return json.loads(response.text)
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=10000)
