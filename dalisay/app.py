@@ -12,6 +12,7 @@ class Diagnosis(BaseModel):
   word_synonyms: str
   synonyms: list[str]
   info_link_data: list[list[str]]
+  treatments: str
 
 def create_app():
   app = Flask(__name__)
@@ -87,6 +88,9 @@ def create_app():
         "Match the symptoms to the closest disease based on the data.",
         "The symptoms are: " + symptoms,
         "Include the information link data in the response.",
+        "Read the url from the data and get the treatments for the disease.",
+        "Summarize the treatments in just a single paragraph.",
+        "Append the summarized treatments to the response and store it in the 'treatments' property.",
         "Return the top three matching items."],
       config = {
         "response_mime_type": "application/json",
