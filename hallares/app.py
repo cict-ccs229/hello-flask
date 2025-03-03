@@ -1,24 +1,21 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import json
 import os
 
-
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+json_path = os.path.join(BASE_DIR, "hallares", "diseases.json")
 
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "hallares", "frontend"))
 
-app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "sapasap/frontend"))
-
-
-json_path = os.path.join(BASE_DIR, "sapasap/diseases.json")
 with open(json_path, encoding="utf-8") as f:
-    diseases_data = json.load(f)
+    app.diseases_data = json.load(f)
 
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
         symptom = request.form.get("symptom").lower()
         matches = [
-            disease for disease in diseases_data
+            disease for disease in app.diseases_data
             if symptom in disease.get("word_synonyms", "").lower() or
                any(symptom in syn.lower() for syn in disease.get("synonyms", []))
         ]
@@ -27,7 +24,7 @@ def home():
 
 @app.route("/disease/<disease_id>")
 def disease_details(disease_id):
-    disease = next((d for d in diseases_data if d["key_id"] == disease_id), None)
+    disease = next((d for d in app.diseases_data if d["key_id"] == disease_id), None)
     return render_template("disease.html", disease=disease) if disease else "Not Found"
 
 if __name__ == "__main__":
