@@ -3,4 +3,4 @@ gunicorn==21.2.0
 itsdangerous == 2.2.0
 Jinja2 == 3.0.3
 python-dotenv == 1.0.1
-genai = 2.0.0
+genai == 2.0.0
