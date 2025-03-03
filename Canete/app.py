@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request, render_template
 import json
 
+from google import genai
+
 app = Flask(__name__)
 
 # Load JSON data
