@@ -3,6 +3,5 @@ gunicorn
 itsdangerous
 jinja2
 python-dotenv
-genagoogle-generativeai
+google-generativeai
 pydantic
-
