@@ -1,8 +1,7 @@
 flask
 gunicorn
-itsdangerous 
+itsdangerous
 jinja2
 python-dotenv
 genai
-google-generativeai
 pydantic
