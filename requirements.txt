@@ -4,3 +4,4 @@ itsdangerous
 jinja2
 python-dotenv
 genai
+google 
