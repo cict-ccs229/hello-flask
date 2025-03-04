@@ -20,11 +20,15 @@ class Diagnosis(BaseModel):
     synonyms: list[str]
     info_link_data: list[list[str]]
 
-load_dotenv()
-config = dotenv_values(".env")
-client = genai.Client(api_key=config['GEMINI_API_KEY'])
+if os.getenv("RENDER") is None:  # 'RENDER' is set automatically on Render's environment
+    load_dotenv()
 
-app = Flask(__name__)
+api_key = os.getenv("GEMINI_API_KEY")
+
+if not api_key:
+    raise ValueError("GEMINI_API_KEY is missing from environment variables.")
+
+client = genai.Client(api_key=api_key)
 
 
 @app.route('/')
