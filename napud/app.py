@@ -14,7 +14,7 @@ class Diagnosis(BaseModel):
     info_link_data: list[list[str]]
     treatments: str
 
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+dotenv_path = os.path.join(os.path.dirname(__file__), 'napud', '.env')
 load_dotenv(dotenv_path=dotenv_path)
 
 config = dotenv_values(".env")
