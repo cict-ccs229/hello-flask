@@ -1,9 +1,9 @@
 from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request
 from dotenv import load_dotenv, dotenv_values
 from google import genai
-import json
+import json, os
 from pydantic import BaseModel
-import os
 
 class Diagnosis(BaseModel):
     key_id: str
