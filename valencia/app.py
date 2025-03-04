@@ -3,6 +3,7 @@ from dotenv import load_dotenv, dotenv_values
 from google import genai
 import json
 from pydantic import BaseModel
+import os
 
 class Diagnosis(BaseModel):
     key_id: str
@@ -20,7 +21,7 @@ config = dotenv_values(".env")
 client = genai.Client(api_key=config['GEMINI_API_KEY'])
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', template_folder='templates')
 
 # Load data from diseases.json file
 with open('diseases.json') as f:
@@ -95,4 +96,5 @@ def search():
     return jsonify(results if results else {"message": "No results found."})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Default to 5000 if PORT is not set
+    app.run(host="0.0.0.0", port=port)
