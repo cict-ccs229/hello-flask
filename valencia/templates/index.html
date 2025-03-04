@@ -2,11 +2,11 @@
 <html>
 <head>
     <title>Health Navigator: Your Guide to Diseases and Procedures</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
     <script>
         // Define the base URL for the API
         const baseUrl = 'http://127.0.0.1:5000';
-
+        
         // Fetch data from the API
         async function fetchData(endpoint) {
             const response = await fetch(baseUrl + endpoint);
@@ -40,10 +40,18 @@
             return formatted;
         }
 
+        // Clear the content and input fields
+        function clearContent() {
+            document.getElementById('keyId').value = '';
+            document.getElementById('query').value = '';
+            document.getElementById('symptoms').value = '';
+            document.getElementById('content').innerHTML = '';
+            document.getElementById('progress').innerText = '';
+        }
+
         // Display the home page
-        async function displayHome() {
-            const data = await fetchData('/');
-            document.getElementById('content').innerHTML = formatJson(data);
+        async function clearData() {
+            clearContent();
         }
 
         // Display the information for a specific key_id
@@ -60,25 +68,28 @@
             document.getElementById('content').innerHTML = formatJson(data);
         }
 
-        // Display the categories
-        async function displayCategories() {
-            const data = await fetchData('/categories');
+        // Display all data
+        async function displayAll() {
+            const data = await fetchData('/diseases');
             document.getElementById('content').innerHTML = formatJson(data);
         }
 
-        // Display all data
-        async function displayAll() {
-            const data = await fetchData('/all');
+        // Display the diagnosis results for symptoms
+        async function displayDiagnosis() {
+            const symptoms = document.getElementById('symptoms').value;
+            document.getElementById('progress').innerText = 'Diagnosing...';
+            const data = await fetchData(`/diagnosis?symptoms=${symptoms}`);
             document.getElementById('content').innerHTML = formatJson(data);
+            document.getElementById('progress').innerText = 'Diagnosis Complete';
         }
     </script>
 </head>
-<body>
+<body onload="clearData()">
     <div class="container">
-        <h1>Health Navigator: Your Guide to Diseases and Procedures</h1>
+        <h1>Health Navigator</h1>
+        <h6>Your Personalized Diagnostician and Healthcare Navigator</h6>
         <div class="buttons">
-            <button onclick="displayHome()">Home</button>
-            <button onclick="displayCategories()">Categories</button>
+            <button class="clear" onclick="clearData()">Clear</button>
             <button onclick="displayAll()">All Data</button>
         </div>
         <div class="input-group">
@@ -89,6 +100,11 @@
             <input type="text" id="query" placeholder="Enter search query">
             <button onclick="displaySearch()">Search</button>
         </div>
+        <div class="input-group">
+            <input type="text" id="symptoms" placeholder="Enter symptoms">
+            <button onclick="displayDiagnosis()">Diagnose</button>
+        </div>
+        <div id="progress" class="progress"></div>
         <div id="content" class="content"></div>
     </div>
 </body>
