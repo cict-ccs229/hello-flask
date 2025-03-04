@@ -15,7 +15,8 @@ class Diagnosis(BaseModel):
     treatments: str
 
 dotenv_path = os.path.join(os.path.dirname(__file__), 'napud', '.env')
-load_dotenv(dotenv_path=dotenv_path)
+
+load_dotenv(dotenv_path)
 
 config = dotenv_values(".env")
 
