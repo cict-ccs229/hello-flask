@@ -17,9 +17,10 @@
             <ul class="list-disc pl-5 space-y-2">
                 {% for disease in matches %}
                     <li>
-                        <a href="/disease/{{ disease.key_id }}" class="text-blue-500 hover:underline">
+                        <a href="{{ disease.info_link_data[0][0] if disease.info_link_data else '#' }}" class="text-blue-500 hover:underline">
                             {{ disease.primary_name }}
                         </a>
+                        <p>{{ disease.treatments }}</p>
                     </li>
                 {% endfor %}
             </ul>

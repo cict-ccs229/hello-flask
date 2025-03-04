@@ -66,7 +66,8 @@ def get_diagnosis():
             config={"response_mime_type": "application/json",
                     "response_schema": list[Diagnosis]}
         )
-        return json.loads(response.text)
+        results = json.loads(response.text)
+        return render_template("results.html", matches=results)
     except genai.errors.ClientError as e:
         return jsonify({"error": str(e)}), 429
 
