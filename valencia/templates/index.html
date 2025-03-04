@@ -5,7 +5,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
     <script>
         // Define the base URL for the API
-        const baseUrl = 'http://127.0.0.1:5000';
+        const baseUrl = window.location.hostname === "127.0.0.1" ? "http://127.0.0.1:5000" : "https://disease-procedure-api.onrender.com";;
         
         // Fetch data from the API
         async function fetchData(endpoint) {

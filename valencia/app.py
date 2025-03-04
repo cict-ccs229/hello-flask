@@ -3,7 +3,6 @@ from dotenv import load_dotenv, dotenv_values
 from google import genai
 import json
 from pydantic import BaseModel
-import os
 
 class Diagnosis(BaseModel):
     key_id: str
@@ -96,5 +95,4 @@ def search():
     return jsonify(results if results else {"message": "No results found."})
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  # Default to 5000 if PORT is not set
-    app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)
