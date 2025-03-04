@@ -14,18 +14,11 @@ class Diagnosis(BaseModel):
     info_link_data: list[list[str]]
     treatments: str
 
-dotenv_path = os.path.join(os.path.dirname(__file__), 'napud', '.env')
-
-load_dotenv(dotenv_path)
+load_dotenv()
 
 config = dotenv_values(".env")
 
-# Check if GEMINI_API_KEY is present in the environment variables
-if "GEMINI_API_KEY" not in config:
-    raise KeyError("GEMINI_API_KEY not found in environment variables")
-
-# Initialize the Client class with the API key
-client = genai.Client(api_key=config["GEMINI_API_KEY"])
+client = genai.Client(api_key=config['GEMINI_API_KEY'])
 
 # initialization
 app = Flask(__name__, template_folder='frontend')
