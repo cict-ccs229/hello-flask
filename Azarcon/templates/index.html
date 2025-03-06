@@ -2,49 +2,38 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <title>PhilHealth</title>
+    <title>Diagnosify</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body class="bg-gray-900 text-white">
-    <div class="container mx-auto p-4">
-        <h1 class="text-4xl font-bold text-center mb-8">PhilHealth</h1>
-        <form action="/lookup" method="post" class="max-w-xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg">
-            <label for="query" class="block text-lg font-medium mb-2">Enter disease name or ICD code:</label>
+    <div class="container mx-auto p-4 pt-12">
+        <h1 class="text-4xl font-bold text-center mb-2">Diagnosify</h1>
+        <h2 class="text-lg text-center mb-8">Disease Database and Proactive Diagnosis</h2>
+        
+        <div class="flex justify-center mb-4">
+            <button id="toggleLookup" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-l-lg">Lookup</button>
+            <button id="toggleDiagnosis" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-r-lg">Diagnosis</button>
+        </div>
+
+        <form id="lookupForm" action="/lookup" method="post" class="max-w-xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg">
+            <label for="query" class="block text-sm font-medium mb-2">Search Disease Name / ICD Code:</label>
             <input type="text" id="query" name="query" required class="w-full p-2 mb-4 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Lookup</button>
+            <button type="submit" class="w-full text-white font-bold py-2 px-4 rounded-lg" style="background-color: #6b8ed6;">Lookup</button>
         </form>
-        <div id="results" class="mt-8"></div>
+
+        <form id="diagnosisForm" action="/diagnosis" method="get" class="max-w-xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg hidden">
+            <label for="symptoms" class="block text-sm font-medium mb-2">Enter Symptoms:</label>
+            <input type="text" id="symptoms" name="symptoms" placeholder="e.g., fever, cough, headache" required class="w-full p-2 mb-4 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit" class="w-full text-white font-bold py-2 px-4 rounded-lg" style="background-color: #6b8ed6;">Diagnose</button>
+        </form>
+
+        <div class="max-w-xl mx-auto mt-8">
+            <div id="results"></div>
+            <div class="spinner" id="spinner"></div>
+        </div>
     </div>
 
-    <script>
-        document.querySelector('form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            fetch('/lookup', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                const resultsDiv = document.getElementById('results');
-                if (data.length > 0) {
-                    resultsDiv.innerHTML = '<h2 class="text-2xl font-bold mb-4 text-center">Results:</h2>' + data.map(disease => `
-                        <div class="bg-gray-800 p-4 mb-4 rounded-lg shadow-lg border border-gray-600">
-                            <h3 class="text-xl font-semibold text-center">${disease.primary_name}</h3>
-                            <p class="text-center"><strong>ICD-10-CM Codes:</strong> ${disease.icd10cm_codes}</p>
-                            <p class="text-center"><strong>Type:</strong> ${disease.is_procedure ? 'Medical Procedure (e.g., surgery, diagnostic tests)' : 'Disease or Condition'}</p>
-                            <p class="text-center"><strong>Synonyms:</strong> ${disease.synonyms.join(', ')}</p>
-                            <p class="text-center"><strong>Info Links:</strong></p>
-                            <ul class="list-none text-center">
-                                ${disease.info_links.map(link => `<li><a href="${link[0]}" target="_blank" class="text-blue-400 hover:underline">${link[1]}</a></li>`).join('')}
-                            </ul>
-                        </div>
-                    `).join('');
-                } else {
-                    resultsDiv.innerHTML = '<p class="text-red-500 text-center">No results found.</p>';
-                }
-            });
-        });
-    </script>
+    <script src="/static/scripts.js"></script>
 </body>
 </html>
