@@ -2,6 +2,7 @@ Flask
 Flask-CORS
 gunicorn 
 python-dotenv
-google-genai
 Werkzeug
+google-generativeai
+
 
