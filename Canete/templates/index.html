@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disease Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+        <h1 class="text-2xl font-bold mb-4 text-center">Disease Search</h1>
+        
+        <input type="text" id="searchInput" class="w-full p-2 border rounded-lg" placeholder="Search for a disease...">
+        
+        <ul id="suggestions" class="mt-2 border rounded-lg bg-white max-h-40 overflow-y-auto hidden"></ul>
+        
+        <div id="diseaseInfo" class="mt-4 p-4 border rounded-lg hidden"></div>
+    </div>
+</body>
+</html>
