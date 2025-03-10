@@ -5,7 +5,7 @@ body {
 }
 
 .container {
-    width: 50%;
+    width: 60%;
     margin: auto;
     padding: 20px;
     background: white;
@@ -13,16 +13,19 @@ body {
     border-radius: 5px;
 }
 
-#chatbox {
-    width: 100%;
+.chat-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.chatbox {
+    width: 48%;
     height: 300px;
     border: 1px solid #ccc;
     padding: 10px;
     overflow-y: scroll;
     background: #fff;
-}
-
-#messages {
     text-align: left;
 }
 
