@@ -3,6 +3,7 @@ from dotenv import load_dotenv, dotenv_values
 from google import genai
 import json
 from pydantic import BaseModel
+import os
 
 class Diagnosis(BaseModel):
     key_id: str
@@ -12,12 +13,17 @@ class Diagnosis(BaseModel):
     synonyms: list[str]
     info_link_data: list[list[str]]
 
-# Load environment variables
+# Load environment variables from .env (for local development)
 load_dotenv()
-config = dotenv_values(".env")
+
+# Fetch the API key from environment variables
+api_key = os.getenv('GEMINI_API_KEY')
+
+if not api_key:
+    raise KeyError("GEMINI_API_KEY is not set in the environment variables.")
 
 # Initialize the Gemini client
-client = genai.Client(api_key=config['GEMINI_API_KEY'])
+client = genai.Client(api_key=api_key)
 
 # Initialize Flask app
 app = Flask(__name__, static_folder='static', template_folder='templates')
