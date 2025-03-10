@@ -9,8 +9,13 @@
 <body>
     <div class="container">
         <h1>Medical Diagnosis Chatbot</h1>
-        <div id="chatbox">
-            <div id="messages"></div>
+        <div class="chat-container">
+            <div class="chatbox" id="apiMessages">
+                <h3>API Response</h3>
+            </div>
+            <div class="chatbox" id="geminiMessages">
+                <h3>Gemini AI Response</h3>
+            </div>
         </div>
         <input type="text" id="userInput" placeholder="Enter symptoms..." onkeypress="sendMessage(event)">
         <button onclick="sendMessage()">Send</button>
