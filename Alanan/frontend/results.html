@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Search Results for "{{ symptom }}"</h1>
+        {% if matches %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Disease Name</th>
+                        <th>Consumer Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for disease in matches %}
+                        <tr>
+                            <td>{{ disease.key_id }}</td>
+                            <td>{{ disease.primary_name }}</td>
+                            <td>{{ disease.consumer_name }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No matching diseases found.</p>
+        {% endif %}
+        <a href="{{ url_for('home') }}">Back to Home</a>
+    </div>
+</body>
+</html>
