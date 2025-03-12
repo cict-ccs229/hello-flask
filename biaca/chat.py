@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request
-from dotenv import load_dotenv, dotenv_values
+from dotenv import load_dotenv
 import google.generativeai as genai
 import json
+import os  
 from pydantic import BaseModel
 
 # Define the Blueprint
@@ -16,16 +17,18 @@ class Diagnosis(BaseModel):
     synonyms: list[str]
     info_link_data: list[list[str]]
 
-# Load environment variables
+# Load environment variables from .env file if it exists
 load_dotenv()
-config = dotenv_values(".env")
+
+# Get API key from environment variables
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Ensure API key exists
-if 'GEMINI_API_KEY' not in config:
-    raise ValueError("Missing GEMINI_API_KEY in .env file")
+if not GEMINI_API_KEY:
+    raise ValueError("Missing GEMINI_API_KEY environment variable")
 
 # Configure the Generative AI client
-genai.configure(api_key=config['GEMINI_API_KEY'])
+genai.configure(api_key=GEMINI_API_KEY)
 
 # Load disease data
 try:
