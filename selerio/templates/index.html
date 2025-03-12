@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseases Information</title>
+    <style>
+        /* General Page Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: rgb(248, 223, 240);
+            color: #333;
+        }
+        
+        /* Header Styling */
+        h1 {
+            text-align: center;
+            color: rgb(172, 13, 100);
+            font-size: 40px;
+        }
+
+        /* Search Box */
+        input[type="text"] {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            margin: 20px auto;
+            display: block;
+            border: 2px solid rgb(180, 120, 196);
+            border-radius: 5px;
+            font-size: 20px;
+        }
+
+         /* Search Results */
+         #results {
+            margin-top: 20px;
+            padding: 10px;
+        }
+
+        .result-item {
+            background: #fff;
+            margin: 10px 0;
+            padding: 15px;
+            border-left: 5px solid rgb(228, 164, 212);
+            border-radius: 5px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item strong {
+            font-size: 18px;
+            color: rgb(172, 13, 100);
+        }
+
+         /* Disease List */
+         .disease-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            list-style-type: none; /* Remove default list markers */
+            padding: 0; /* Remove default padding */
+        }
+
+        .disease-list li {
+            background: #fff;
+            margin: 10px 0;
+            padding: 15px;
+            border-left: 5px solid rgb(228, 164, 212);
+            border-radius: 5px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            flex: 1 1 calc(50% - 20px); /* Two columns */
+            box-sizing: border-box;
+        }
+
+        /* Links */
+        a {
+            color:rgb(230, 22, 136);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            input[type="text"] {
+                width: 90%;
+            }
+
+            .disease-list li {
+                flex: 1 1 100%; /* Single column on small screens */
+            }
+        }
+    </style>
+    <script>
+        function searchDisease() {
+            let query = document.getElementById("search").value.toLowerCase();
+            fetch(`/search?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    let resultsDiv = document.getElementById("results");
+                    resultsDiv.innerHTML = "";
+                    if (data.length === 0) {
+                        resultsDiv.innerHTML = "<p>No results found.</p>";
+                    } else {
+                        data.forEach(disease => {
+                            let infoLink = disease.info_link_data.length ? 
+                                `<a href="${disease.info_link_data[0][0]}" target="_blank">${disease.info_link_data[0][1]}</a>` 
+                                : 'No Link Available';
+                            resultsDiv.innerHTML += `<p><strong>${disease.primary_name}</strong> - ${infoLink}</p>`;
+                        });
+                    }
+                });
+        }
+    </script>
+</head>
+<body>
+    <h1>Diseases Information</h1>
+    <input type="text" id="search" placeholder="Search for a disease..." onkeyup="searchDisease()">
+    <div id="results"></div>
+    
+    <h2>All Diseases</h2>
+    <ul class="disease-list">
+        {% for disease in diseases %}
+            <li><strong>{{ disease.primary_name }}</strong> - 
+                <a href="{{ disease.info_link_data[0][0] if disease.info_link_data else '#' }}" target="_blank">
+                {{ disease.info_link_data[0][1] if disease.info_link_data else 'No Link Available' }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
