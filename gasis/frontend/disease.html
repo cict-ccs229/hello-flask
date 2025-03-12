@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disease Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center h-screen bg-no-repeat bg-center bg-purple-100"
+      style="background-image: url('/static/nurse_logo.png'); background-size: contain;">
+
+    <div class="bg-white shadow-lg rounded-lg p-8 w-96">
+        <h2 class="text-2xl font-bold text-center mb-4 text-purple-700">About the Disease</h2>
+        
+        {% if disease %}
+            <p><strong>Name:</strong> {{ disease.primary_name }}</p>
+            <p><strong>ICD-10 Code:</strong> {{ disease.icd10cm_codes if disease.icd10cm_codes else "Not available" }}</p>
+            <p><strong>Synonyms:</strong> {{ ', '.join(disease.synonyms) if disease.synonyms else "None" }}</p>
+            
+            {% if disease.term_icd9_text %}
+                <p class="mt-4"><strong>Description:</strong> {{ disease.term_icd9_text }}</p>
+            {% else %}
+                <p class="mt-4 text-gray-500">No description available.</p>
+            {% endif %}
+            
+            {% if disease.info_link_data %}
+                <p class="mt-4"><strong>More Info:</strong></p>
+                <ul class="list-disc pl-5">
+                    {% for link in disease.info_link_data %}
+                        <li>
+                            <a href="{{ link[0] }}" class="text-purple-500 hover:underline" target="_blank">
+                                {{ link[1] }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="mt-4 text-gray-500">No additional info available.</p>
+            {% endif %}
+        {% else %}
+            <p class="text-gray-500 text-center">Disease not found.</p>
+        {% endif %}
+
+        <div class="mt-6 text-center">
+            <a href="/" class="bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-600 transition">
+                Search Again
+            </a>
+        </div>
+    </div>
+</body>
+</html>
