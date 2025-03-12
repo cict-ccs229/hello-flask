@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiagnoSearch - Disease Information</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <div class="title-container">
+        <h1>DiagnoSearch</h1>
+    </div>
+
+    <div class="container">
+        <p>
+            DiagnoSearch is a simple tool designed to help you identify diseases. 
+            Provide key terms and we will check matched diseases from our database.
+        </p>
+
+        <form id="symptom-form">
+            <label for="symptoms">Enter key terms:</label>
+            <input type="text" id="symptoms" name="symptoms" placeholder="e.g., fever, cough, nausea" required>
+            <button type="submit">search</button>
+        </form>
+
+        <div id="error" class="error"></div>
+        <div id="results" style="display: none;">
+            <p>The following diseases matched your input:</p>
+            <ul id="disease-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('symptom-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const symptoms = document.getElementById('symptoms').value.trim();
+            const resultsDiv = document.getElementById('results');
+            const errorDiv = document.getElementById('error');
+            const diseaseList = document.getElementById('disease-list');
+
+            resultsDiv.style.display = 'none';  
+            diseaseList.innerHTML = '';  
+            errorDiv.textContent = '';  
+
+            if (!symptoms) {
+                errorDiv.textContent = "Please enter at least one symptom.";
+                return;
+            }
+
+            fetch(`/diagnose?symptoms=${encodeURIComponent(symptoms)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        errorDiv.textContent = data.error;
+                    } else {
+                        if (data.possible_diseases.length > 0) {
+                            data.possible_diseases.forEach(disease => {
+                                const li = document.createElement('li');
+                                const a = document.createElement('a');
+                                a.href = `/disease/${encodeURIComponent(disease.name)}`;
+                                a.innerHTML = `${disease.name} <span class="matched-symptoms">(Matched with: ${disease.matched_symptoms.join(", ")})</span>`;
+                                
+                                li.appendChild(a);
+                                diseaseList.appendChild(li);
+                            });
+
+                            resultsDiv.style.display = 'block'; 
+                        } else {
+                            resultsDiv.style.display = 'block';
+                            diseaseList.innerHTML = "<li>No matching diseases found. Try different symptoms.</li>";
+                        }
+                    }
+                })
+                .catch(error => {
+                    errorDiv.textContent = "An error occurred. Please try again later.";
+                    console.error("Error:", error);
+                });
+        });
+    </script>
+
+</body>
+</html>
