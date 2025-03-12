@@ -2,7 +2,6 @@ from flask import Blueprint, jsonify, request
 from dotenv import load_dotenv, dotenv_values
 import google.generativeai as genai
 import json
-import os
 from pydantic import BaseModel
 
 # Define the Blueprint
@@ -17,17 +16,16 @@ class Diagnosis(BaseModel):
     synonyms: list[str]
     info_link_data: list[list[str]]
 
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
+config = dotenv_values(".env")
 
-# Get API key from system environment first, then fallback to .env
-api_key = os.getenv("GEMINI_API_KEY") or dotenv_values(".env").get("GEMINI_API_KEY")
-
-if not api_key:
-    raise ValueError("Missing GEMINI_API_KEY in environment or .env file")
+# Ensure API key exists
+if 'GEMINI_API_KEY' not in config:
+    raise ValueError("Missing GEMINI_API_KEY in .env file")
 
 # Configure the Generative AI client
-genai.configure(api_key=api_key)
+genai.configure(api_key=config['GEMINI_API_KEY'])
 
 # Load disease data
 try:
@@ -58,6 +56,7 @@ def chat_message():
 
     reply = response.text if hasattr(response, 'text') else response.candidates[0].content
     return jsonify({"reply": reply})
+
 
 @chat_bp.route('/diagnosis', methods=['GET'])
 def get_diagnosis():
