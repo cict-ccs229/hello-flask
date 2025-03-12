@@ -78,14 +78,20 @@
                 <label for="otherSymptom" class="form-label">Other Symptoms:</label>
                 <input type="text" class="form-control" id="otherSymptom" name="other_symptom" placeholder="Type other symptoms here">
             </div>
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary" 
+            <div class="d-flex gap-2 text-center">
+                <button type="submit" class="btn btn-primary flex-fill" 
                     style="box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3); transition: all 0.2s; border: none;"
                     onmousedown="this.style.transform='translateY(4px)'; this.style.boxShadow='2px 2px 4px rgba(0, 0, 0, 0.3)';"
                     onmouseup="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 8px rgba(0, 0, 0, 0.3)';">
                     Submit
                 </button>
-            </div>
+                <a href="/chat" class="btn btn-secondary flex-fill" 
+                    style="box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3); transition: all 0.2s; border: none;"
+                    onmousedown="this.style.transform='translateY(4px)'; this.style.boxShadow='2px 2px 4px rgba(0, 0, 0, 0.3)';"
+                    onmouseup="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 8px rgba(0, 0, 0, 0.3)';">
+                    Chat with Albularyo
+                </a>
+            </div>            
         </form>
         <div id="result" class="mt-4 text-center"></div>
     </div>
