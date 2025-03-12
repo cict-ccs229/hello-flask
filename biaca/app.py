@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, render_template
 import json
 import re
-from chat import chat_bp  # Import the chatbot Blueprint
+from chat import chat_bp   
 
 app = Flask(__name__)
 
