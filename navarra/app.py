@@ -1,9 +1,9 @@
-from flask import Flask, jsonify, redirect, url_for, request, render_template
-import json
-import os
-from google import genai
+from flask import Flask, jsonify, request, render_template
 from dotenv import load_dotenv, dotenv_values
 from pydantic import BaseModel
+import json
+import os
+import google.generativeai as genai
 
 class Diagnosis(BaseModel):
     key_id: str
@@ -13,18 +13,29 @@ class Diagnosis(BaseModel):
     word_synonyms: str
     synonyms: list[str]
     info_link_data : list[list[str]]
+    treatments: str
 
 load_dotenv()
 
-config = dotenv_values(".env")
+key = os.getenv('API_KEY')
+if not key:
+    raise ValueError("API key not found")
 
-client = genai.Client(config["API_KEY"])
+if not key:
+    raise ValueError("API key is missing")
+
+try:
+    genai.configure(api_key=key)
+    print("Google Generative AI configured successfully!")
+except Exception as e:
+    print(f"Configuration error: {e}")
+    raise ValueError("Failed to configure client with the API key")
+
+app = Flask(__name__)
 
 # Load the JSON file
 with open('diseases.json', encoding="utf-8") as file:  # Works cross-platform
     data = json.load(file)
-
-app = Flask(__name__)
 
 @app.route('/')
 def home():
@@ -60,23 +71,47 @@ def get_disease(key_id):
         return render_template('disease_details.html', disease=disease_info)
     else:
         return "Disease not found", 404
+    
+@app.route('/chat', methods=['GET'])
+def chat():
+    return render_template("chat.html")
 
-@app.route('/diagnosis', methods=['POST'])
-def diagnosis():
-    symptoms = request.json.get('symptoms', []).lower()
-    response = client.models.generate_content(
-    model="gemini-2.0-flash",
-    contents=[
-        "This is the existing data in JSON format: "+ json.dumps(data),
-        "Match the closest disease with following symptoms: " + symptoms,
-        "Include the info_link_data in the response.",
-        "Return the top three matching items."
-    ],
-    config={
-        "response_mime_type":"application/json",
-        "response_schema": list[Diagnosis]
-    }
+# Route for generating diagnosis based on disease name
+@app.route('/get_diagnosis', methods=['POST'])
+def get_diagnosis():
+    data = request.get_json()
+    disease_name = data.get("disease_name", "").strip()
+
+    if not disease_name:
+        return jsonify({"error": "Please enter a disease name."}), 400
+
+    model = genai.GenerativeModel("gemini-1.5-flash-002")
+    
+    response = model.generate_content(
+        contents=[
+            f"Diagnose a patient with {disease_name}. Provide symptoms, possible causes, and treatment options."
+        ]
     )
+    
+    return jsonify({"diagnosis": response.text})
+
+@app.route('/diagnosis', methods=['GET'])
+def diagnosis():
+    symptoms = request.args.get('symptoms', '').strip().lower()
+    model = genai.GenerativeModel("gemini-1.5-flash-002")
+    response = model.generate_content(
+        contents=[
+            "This is the existing data in JSON format: " + json.dumps(data),
+            "Match the closest disease with following symptoms: " + symptoms,
+            "Include the info_link_data in the response.",
+            "Return the top three matching items."
+        ],
+        generation_config={
+            "response_mime_type": "application/json",
+            "response_schema": list[Diagnosis]
+        }
+    )
+
     return json.loads(response.text)
 
 if __name__ == '__main__':

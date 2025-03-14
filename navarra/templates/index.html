@@ -128,7 +128,8 @@
     <nav class="navbar navbar-expand-lg custom-navbar">
         <a class="navbar-brand ms-4 text-black" href="#">
             <i class="fas fa-heartbeat"></i> MedFind
-        </a>    
+        </a>
+        <a class="navbar-brand ms-auto me-4 text-black" href="/chat">AI Diagnosis Chat</a>    
     </nav>
 
     <div class="container">
@@ -141,46 +142,45 @@
 
     <script>
         function searchDisease() {
-    const query = document.getElementById("diseaseInput").value.trim();
-    if (!query) {
-        alert("Please enter a search keyword!");
-        return;
-    }
+            const query = document.getElementById("diseaseInput").value.trim();
+            if (!query) {
+                alert("Please enter a search keyword!");
+                return;
+            }
 
-    fetch("/search_disease", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const resultDiv = document.getElementById("result");
-        resultDiv.innerHTML = "";
+            fetch("/search_disease", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById("result");
+                resultDiv.innerHTML = "";
 
-        if (data.error) {
-            resultDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
-        } else {
-            resultDiv.innerHTML = "<h3>Search Results:</h3>";
-            data.forEach(disease => {
-                const description = disease.term_icd9_text 
-                    ? disease.term_icd9_text.split(". ").slice(0, 3).join(". ") + "..." 
-                    : "No description available.";
-                    
-                resultDiv.innerHTML += `
-                    <div class="result-item">
-                        <a href="/disease/${disease.key_id}">${disease.primary_name}</a>
-                        <p class="description">${description}</p>
-                    </div>
-                `;
+                if (data.error) {
+                    resultDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
+                } else {
+                    resultDiv.innerHTML = "<h3>Search Results:</h3>";
+                    data.forEach(disease => {
+                        const description = disease.term_icd9_text 
+                            ? disease.term_icd9_text.split(". ").slice(0, 3).join(". ") + "..." 
+                            : "No description available.";
+                            
+                        resultDiv.innerHTML += `
+                            <div class="result-item">
+                                <a href="/disease/${disease.key_id}">${disease.primary_name}</a>
+                                <p class="description">${description}</p>
+                            </div>
+                        `;
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Failed to fetch data. Check console for details.");
             });
         }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        alert("Failed to fetch data. Check console for details.");
-    });
-}
-
     </script>
 </body>
 </html>
