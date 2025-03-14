@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function showModal(description, suggestions) {
+            console.log('Show Modal:', description, suggestions);  // Debugging log
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `<p><strong>Suggestions:</strong> ${suggestions}</p><p>${description}</p>`;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            console.log('Close Modal');  // Debugging log
+            const modal = document.getElementById('modal');
+            modal.classList.add('hidden');
+        }
+    </script>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-purple-100"
+      style="background-image: url('/static/nurse_logo.png'); background-size: contain; background-position: center; background-repeat: no-repeat;">
+
+    <div class="bg-white shadow-xl rounded-lg p-6 w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center text-purple-700 mb-4">Search Results</h2>
+
+        {% if matches %}
+            <div class="space-y-2">
+                {% for disease in matches %}
+                    <div class="border border-purple-300 rounded-lg p-4 transition hover:bg-purple-50">
+                        <a href="javascript:void(0);" onclick="showModal('{{ disease.description | escape }}', '{{ disease.suggestions | escape }}')" class="text-lg text-purple-600 font-semibold hover:underline">
+                            {{ disease.primary_name }}
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500 text-center">No diseases found with that symptom.</p>
+        {% endif %}
+
+        <div class="mt-6 text-center">
+            <a href="/" class="bg-purple-500 text-white py-2 px-5 rounded-lg hover:bg-purple-600 transition shadow-md">
+                Search Again
+            </a>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg p-6 w-96 max-h-full overflow-y-auto">
+            <h3 class="text-xl font-bold mb-4">Disease Description</h3>
+            <div id="modal-content" class="text-gray-700"></div>
+            <div class="mt-6 text-center">
+                <button onclick="closeModal()" class="bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-600 transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
