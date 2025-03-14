@@ -1,34 +1,83 @@
-from flask import Flask, jsonify, request, render_template_string
-from flask_cors import CORS
+from flask import Flask, jsonify, render_template, request
+from dotenv import load_dotenv, dotenv_values
+from google import genai
 import json
-import os
+from pydantic import BaseModel
 
-app = Flask(__name__)
-CORS(app)
+class Diagnosis(BaseModel):
+    key_id: str
+    primary_name: str
+    consumer_name: str
+    word_synonyms: str
+    synonyms: list[str]
+    info_link_data: list[list[str]]
 
-# Load the data from the JSON file
-json_path = os.path.join(os.path.dirname(__file__), 'diseases.json')
-with open(json_path) as file:
-    data = json.load(file)
+# Load environment variables
+load_dotenv()
+config = dotenv_values(".env")
 
-@app.route('/')
+# Initialize the Gemini client
+client = genai.Client(api_key=config['GEMINI_API_KEY'])
+
+# Initialize Flask app
+app = Flask(__name__, static_folder='static', template_folder='templates')
+
+# Load data from diseases.json file
+with open('diseases.json') as f:
+    diseases = json.load(f)
+
+@app.route("/")
 def home():
-    return jsonify({"message": "Welcome to the Diseases and Procedures API! Use the endpoints below for more details.",
-                    "endpoints": {
-                        "/info/<key_id>": "Get information for a specific key_id.",
-                        "/search": "Search diseases or procedures by name or keyword.",
-                        "/categories": "List all unique categories (disease/procedure).",
-                        "/all": "Retrieve all diseases and procedures data."
-                    }})
+    """Home route that renders a modernized minimalist template."""
+    return render_template("index.html")
 
-@app.route('/info/<key_id>', methods=['GET'])
-def get_info(key_id):
-    """Fetch information by key_id."""
-    result = next((item for item in data if item['key_id'] == key_id), None)
-    if result:
-        return jsonify(result)
-    else:
-        return jsonify({"error": "No information found for the given key_id."}), 404
+@app.route('/diseases', methods=['GET'])
+def get_diseases():
+    """Retrieve the list of all diseases from local JSON."""
+    return jsonify(diseases)
+
+@app.route('/chat', methods=['GET'])
+def get_chat():
+    """Generate a basic diagnostic example."""
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=[
+            "You are a medical diagnostic expert.",
+            "Analyze the following symptoms: black skin spots, swelling, fever, vomiting, and headache.",
+            "The patient has been experiencing the symptoms for a week.",
+            "Provide a diagnosis along with confidence levels for possible diseases."
+        ]
+    )
+    return response.text
+
+@app.route('/diagnosis', methods=['GET'])
+def get_diagnosis():
+    """Provide diagnosis based on symptoms provided by the user."""
+    symptoms = request.args.get('symptoms', '').lower()
+    if not symptoms:
+        return jsonify({"error": "Symptoms parameter is required."}), 400
+
+    # Generate diagnosis with confidence levels
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=[
+            f"This is the existing data in JSON format: {json.dumps(diseases)}",
+            f"Match the closest disease with the following symptoms: {symptoms}",
+            "Provide the most likely disease with a confidence percentage.",
+            "List the next three closest diseases with their confidence levels.",
+            "Include the info_link_data for all matches in the response."
+        ],
+        config={
+            "response_mime_type": "application/json",
+            "response_schema": list[Diagnosis]
+        }
+    )
+    try:
+        # Parse and format response
+        diagnosis = json.loads(response.text)
+        return jsonify(diagnosis)
+    except Exception as e:
+        return jsonify({"error": "Failed to parse response from Gemini API.", "details": str(e)}), 500
 
 @app.route('/search', methods=['GET'])
 def search():
@@ -38,26 +87,12 @@ def search():
         return jsonify({"error": "Query parameter is required."}), 400
 
     results = [
-        item for item in data
+        item for item in diseases
         if query in item['primary_name'].lower() or
            any(query in synonym.lower() for synonym in item.get('synonyms', [])) or
            query in item.get('word_synonyms', '').lower()
     ]
     return jsonify(results if results else {"message": "No results found."})
-
-@app.route('/categories', methods=['GET'])
-def list_categories():
-    """List unique categories: disease or procedure."""
-    categories = {
-        "Diseases": len([item for item in data if not item['is_procedure']]),
-        "Procedures": len([item for item in data if item['is_procedure']])
-    }
-    return jsonify(categories)
-
-@app.route('/all', methods=['GET'])
-def get_all():
-    """Retrieve all diseases and procedures."""
-    return jsonify(data)
 
 if __name__ == '__main__':
     app.run(debug=True)
