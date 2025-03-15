@@ -13,6 +13,12 @@ genai.configure(api_key=config['GEMINI_API_KEY'])
 
 app = Flask(__name__)
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get the directory of app.py
+JSON_PATH = os.path.join(BASE_DIR, "diseases.json")  # Construct the absolute path
+
+with open(JSON_PATH, "r") as file:
+    diseases = json.load(file)
+
 # Load JSON data
 with open("diseases.json", "r") as file:
     diseases = json.load(file)
