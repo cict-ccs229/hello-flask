@@ -1,57 +1,94 @@
-from flask import Flask, request, jsonify, render_template
-import json
 import os
+import json
+import re
+from flask import Flask, jsonify, render_template, request
+from dotenv import load_dotenv, dotenv_values
 import google.generativeai as genai
-from pydantic import BaseModel
-from dotenv import load_dotenv, dotenv_values 
 
-class Disease(BaseModel):
-    key_id: str
-    primary_name: str
-    consumer_name: str
-    word_synonyms: str
-    synonyms: list[str]
-    info_link_data: list[list[str]]
-
-# Load API key
+# Load environment variables
 load_dotenv()
 config = dotenv_values(".env")
 
-# Configure generative AI
 genai.configure(api_key=config['GEMINI_API_KEY'])
 
-# Initialize Flask app
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__)
 
-# Get the directory where the script is running
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-JSON_FILE = os.path.join(BASE_DIR, "diseases.json")
+# Load JSON data
+with open("diseases.json", "r") as file:
+    diseases = json.load(file)
 
-# Load the disease data from the JSON file
-try:
-    with open(JSON_FILE, "r") as file:
-        diseases = json.load(file)
-except FileNotFoundError:
-    diseases = []  # If file is missing, start with an empty list
-
-
-@app.route('/')
+@app.route("/")
 def home():
-    return render_template('index.html', diseases=diseases)
+    """Serve the frontend"""
+    return render_template("index.html")
 
-@app.route('/search', methods=['GET'])
-def search():
-    query = request.args.get('q', '').lower()
+@app.route("/search", methods=["GET"])
+def search_diseases():
+    """Search for diseases by name or synonyms"""
+    query = request.args.get("q", "").strip().lower()
+    if not query:
+        return jsonify([])
+
     results = []
-
-    for d in diseases:
-        # Check if the query matches primary name, synonyms, or ICD codes
-        if (query in d['primary_name'].lower() or
-            any(query in syn.lower() for syn in d.get('synonyms', [])) or
-            any(query in code['code'].lower() for code in d.get('icd10cm', []))):
-            results.append(d)
     
+    for disease in diseases:
+        name_match = query in disease["primary_name"].lower()
+        synonym_match = any(query in synonym.lower() for synonym in disease.get("synonyms", []))
+
+        if name_match or synonym_match:
+            results.append({
+                "key_id": disease["key_id"],
+                "primary_name": disease["primary_name"],
+                "is_procedure": bool(disease.get("is_procedure", False)),  
+                "synonyms": disease.get("synonyms", []),
+                "icd10cm": disease.get("icd10cm", []),
+                "info_links": disease.get("info_link_data", [])
+            })
+
     return jsonify(results)
 
-if __name__ == '__main__':
+@app.route("/gemini-response", methods=["GET"])
+def gemini_response():
+    """Generate disease details using Gemini"""
+    key_id = request.args.get("key_id", "").strip()
+    
+    if not key_id:
+        return jsonify({"error": "No key_id provided"}), 400
+
+    # Find the disease by key_id
+    disease = next((d for d in diseases if d["key_id"] == key_id), None)
+    
+    if not disease:
+        return jsonify({"error": "Disease not found"}), 404
+
+    try:
+        # Initialize the generative model
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')  
+
+        # Generate content
+        response = model.generate_content(
+            f"Provide detailed information about the following disease: {disease['primary_name']}\n"
+            "Return the response in valid JSON format with these fields:\n"
+            "- primary_name: The name of the disease\n"
+            "- description: A brief overview of the disease in 3 sentences\n"
+            "- symptoms: Common symptoms associated with the disease in 2 sentences\n"
+            "- treatment: Effective treatments or remedies in 5 sentences\n"
+        )
+
+        raw_response = response.text
+        print("AI Raw Response:", raw_response)  # Debugging output
+
+        # Remove markdown formatting if present
+        cleaned_response = re.sub(r"```json\s*([\s\S]*?)\s*```", r"\1", raw_response).strip()
+
+        try:
+            disease_data = json.loads(cleaned_response)
+            return jsonify(disease_data)
+        except json.JSONDecodeError:
+            return jsonify({"error": "Invalid response from AI", "raw_response": cleaned_response}), 500
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to generate response: {str(e)}"}), 500
+
+if __name__ == "__main__":
     app.run(debug=True)

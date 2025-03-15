@@ -3,134 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diseases Information</title>
+    <title>Disease Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* General Page Styles */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 20px;
-            background-color: rgb(248, 223, 240);
-            color: #333;
+        #suggestions li {
+            cursor: pointer;
+            padding: 0.5rem;
         }
-        
-        /* Header Styling */
-        h1 {
+        #suggestions li:hover {
+            background-color: #fbcfe8; /* Light pink hover */
+        }
+        .loading-indicator {
+            display: none;
             text-align: center;
-            color: rgb(172, 13, 100);
-            font-size: 40px;
+            margin-top: 1rem;
         }
-
-        /* Search Box */
-        input[type="text"] {
-            width: 100%;
-            max-width: 400px;
-            padding: 10px;
-            margin: 20px auto;
-            display: block;
-            border: 2px solid rgb(180, 120, 196);
-            border-radius: 5px;
-            font-size: 20px;
+        .loading-spinner {
+            display: inline-block;
+            margin-bottom: 0.5rem; /* Space between spinner and text */
         }
-
-         /* Search Results */
-         #results {
-            margin-top: 20px;
-            padding: 10px;
+        .result-card {
+            border: 1px solid #fbcfe8; /* Light pink border */
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background-color: #fdf2f8; /* Very light pink background */
         }
-
-        .result-item {
-            background: #fff;
-            margin: 10px 0;
-            padding: 15px;
-            border-left: 5px solid rgb(228, 164, 212);
-            border-radius: 5px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        .result-card:hover {
+            background-color: #fbcfe8; /* Light pink hover */
         }
-
-        .result-item strong {
-            font-size: 18px;
-            color: rgb(172, 13, 100);
+        .pink-button {
+            background-color: #ec4899; /* Medium pink */
+            color: white;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            transition: background-color 0.2s;
         }
-
-         /* Disease List */
-         .disease-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            list-style-type: none; /* Remove default list markers */
-            padding: 0; /* Remove default padding */
-        }
-
-        .disease-list li {
-            background: #fff;
-            margin: 10px 0;
-            padding: 15px;
-            border-left: 5px solid rgb(228, 164, 212);
-            border-radius: 5px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-            flex: 1 1 calc(50% - 20px); /* Two columns */
-            box-sizing: border-box;
-        }
-
-        /* Links */
-        a {
-            color:rgb(230, 22, 136);
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            input[type="text"] {
-                width: 90%;
-            }
-
-            .disease-list li {
-                flex: 1 1 100%; /* Single column on small screens */
-            }
+        .pink-button:hover {
+            background-color: #db2777; /* Darker pink on hover */
         }
     </style>
-    <script>
-        function searchDisease() {
-            let query = document.getElementById("search").value.toLowerCase();
-            fetch(`/search?q=${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    let resultsDiv = document.getElementById("results");
-                    resultsDiv.innerHTML = "";
-                    if (data.length === 0) {
-                        resultsDiv.innerHTML = "<p>No results found.</p>";
-                    } else {
-                        data.forEach(disease => {
-                            let infoLink = disease.info_link_data.length ? 
-                                `<a href="${disease.info_link_data[0][0]}" target="_blank">${disease.info_link_data[0][1]}</a>` 
-                                : 'No Link Available';
-                            resultsDiv.innerHTML += `<p><strong>${disease.primary_name}</strong> - ${infoLink}</p>`;
-                        });
-                    }
-                });
-        }
-    </script>
 </head>
-<body>
-    <h1>Diseases Information</h1>
-    <input type="text" id="search" placeholder="Search for a disease..." onkeyup="searchDisease()">
-    <div id="results"></div>
-    
-    <h2>All Diseases</h2>
-    <ul class="disease-list">
-        {% for disease in diseases %}
-            <li><strong>{{ disease.primary_name }}</strong> - 
-                <a href="{{ disease.info_link_data[0][0] if disease.info_link_data else '#' }}" target="_blank">
-                {{ disease.info_link_data[0][1] if disease.info_link_data else 'No Link Available' }}
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
+<body class="bg-pink-50 flex items-center justify-center min-h-screen"> <!-- Light pink background -->
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+        <h1 class="text-2xl font-bold mb-4 text-center text-pink-800">Disease Search</h1> <!-- Dark pink text -->
+
+        <input type="text" id="searchInput" class="w-full p-2 border rounded-lg border-pink-300 focus:border-pink-500 focus:ring-pink-500" placeholder="Search for a disease...">
+
+        <ul id="suggestions" class="mt-2 border rounded-lg bg-white max-h-40 overflow-y-auto hidden border-pink-300"></ul>
+
+        <div class="loading-indicator" id="loadingIndicator">
+            <div class="loading-spinner animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div> <!-- Pink spinner -->
+            <p class="mt-2 text-pink-700">Loading...</p> <!-- Pink text -->
+        </div>
+
+        <div id="diseaseInfo" class="mt-4 p-4 border rounded-lg hidden border-pink-300 bg-pink-50"></div> <!-- Light pink background -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            const suggestions = document.getElementById('suggestions');
+            const diseaseInfo = document.getElementById('diseaseInfo');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+
+            searchInput.addEventListener('input', async () => {
+                const query = searchInput.value.trim();
+
+                if (query.length === 0) {
+                    suggestions.innerHTML = '';
+                    suggestions.classList.add('hidden');
+                    return;
+                }
+
+                loadingIndicator.style.display = 'block';
+                suggestions.classList.add('hidden');
+
+                try {
+                    const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+                    const results = await response.json();
+
+                    if (results.length === 0) {
+                        suggestions.innerHTML = '<li class="p-2 text-pink-700">No results found.</li>';
+                        suggestions.classList.remove('hidden');
+                    } else {
+                        suggestions.innerHTML = results.map(disease => `
+                            <li data-key-id="${disease.key_id}" class="result-card">
+                                <strong class="text-pink-800">${disease.primary_name}</strong><br>
+                                ${disease.is_procedure ? '<span class="text-sm text-pink-600">(Procedure)</span><br>' : ''}
+                                <small class="text-pink-700"><strong>Synonyms:</strong> ${disease.synonyms.join(', ') || 'N/A'}</small><br>
+                                <small class="text-pink-700"><strong>ICD10CM Codes:</strong> ${disease.icd10cm.join(', ') || 'N/A'}</small><br>
+                                <small class="text-pink-700"><strong>Info Links:</strong> ${disease.info_links.map(link => `<a href="${link.url}" target="_blank" class="text-pink-600 hover:underline">${link.title}</a>`).join(', ') || 'N/A'}</small>
+                            </li>
+                        `).join('');
+                        suggestions.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Error fetching search results:', error);
+                    suggestions.innerHTML = '<li class="p-2 text-red-500">Error fetching results.</li>';
+                    suggestions.classList.remove('hidden');
+                } finally {
+                    loadingIndicator.style.display = 'none';
+                }
+            });
+
+            suggestions.addEventListener('click', async (event) => {
+                const target = event.target.closest('li');
+
+                if (target && target.tagName.toLowerCase() === 'li') {
+                    const keyId = target.getAttribute('data-key-id');
+                    loadingIndicator.style.display = 'block';
+                    diseaseInfo.classList.add('hidden');
+
+                    try {
+                        const response = await fetch(`/gemini-response?key_id=${encodeURIComponent(keyId)}`);
+                        const data = await response.json();
+
+                        if (data.error) {
+                            diseaseInfo.innerHTML = `<p class="text-red-500">${data.error}</p>`;
+                        } else {
+                            diseaseInfo.innerHTML = `
+                                <h2 class="text-xl font-bold mb-2 text-pink-800">${data.primary_name}</h2>
+                                <p class="text-pink-700"><strong>Description:</strong> ${data.description}</p>
+                                <p class="text-pink-700"><strong>Symptoms:</strong> ${data.symptoms}</p>
+                                <p class="text-pink-700"><strong>Treatment:</strong> ${data.treatment}</p>
+                            `;
+                        }
+                    } catch (error) {
+                        console.error('Error fetching disease details:', error);
+                        diseaseInfo.innerHTML = `<p class="text-red-500">Error fetching disease details.</p>`;
+                    } finally {
+                        diseaseInfo.classList.remove('hidden');
+                        loadingIndicator.style.display = 'none';
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
