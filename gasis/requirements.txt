@@ -5,7 +5,7 @@ Flask-WTF
 Flask-Login
 Flask-Bcrypt
 python-dotenv
-google-genai
+google-generativeai
 unicorn
 Flask-Cors
 google-auth
