@@ -13,15 +13,17 @@ genai.configure(api_key=config['GEMINI_API_KEY'])
 
 app = Flask(__name__)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get the directory of app.py
-JSON_PATH = os.path.join(BASE_DIR, "diseases.json")  # Construct the absolute path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+JSON_PATH = os.path.join(BASE_DIR, "diseases.json")
 
-with open(JSON_PATH, "r") as file:
+print(f"Loading JSON from: {JSON_PATH}")  # Debugging output
+
+if not os.path.exists(JSON_PATH):
+    raise FileNotFoundError(f"❌ File not found: {JSON_PATH}")
+
+with open(JSON_PATH, "r", encoding="utf-8") as file:
     diseases = json.load(file)
 
-# Load JSON data
-with open("diseases.json", "r") as file:
-    diseases = json.load(file)
 
 @app.route("/")
 def home():
