@@ -13,12 +13,12 @@ class Disease(BaseModel):
     synonyms: list[str]
     info_link_data: list[list[str]]
 
-# Load environment variables
-load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))  # Load explicitly
-config = dotenv_values(os.path.join(os.path.dirname(__file__), ".env"))
+# Load API key
+load_dotenv()
+config = dotenv_values(".env")
 
-# Initialize the Gemini client
-client = genai.Client(api_key=config['GEMINI_API_KEY'])
+# Configure generative AI
+genai.configure(api_key=config['GEMINI_API_KEY'])
 
 # Initialize Flask app
 app = Flask(__name__, static_folder='static', template_folder='templates')
