@@ -7,11 +7,8 @@ Flask-Bcrypt
 python-dotenv
 google-genai
 unicorn
-Flask
 Flask-Cors
 google-auth
-google-genai
-python-dotenv
 requests
 gunicorn
 websockets
