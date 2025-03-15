@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 import json
 import os
-from google import genai  
+import google.generativeai as genai
 from pydantic import BaseModel
 from dotenv import load_dotenv, dotenv_values 
 
