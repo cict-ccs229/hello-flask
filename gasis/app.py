@@ -6,7 +6,7 @@ import os
 
 # Load environment variables
 load_dotenv()
-config = dotenv_values(os.path.join(os.path.dirname(__file__), ".env"))
+api_key = os.environ.get('GEMINI_API_KEY')
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
@@ -15,7 +15,7 @@ with open(os.path.join(os.path.dirname(__file__), 'diseases.json')) as f:
     diseases = json.load(f)
 
 # Configure Gemini AI
-genai.configure(api_key=config['GEMINI_API_KEY'])
+genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-1.5-flash-latest")
 
 @app.route("/")
