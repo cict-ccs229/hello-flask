@@ -5,8 +5,8 @@ import json
 import os
 
 # Load environment variables (for Gemini API key)
-load_dotenv()
-config = dotenv_values(".env")
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))  # Load explicitly
+config = dotenv_values(os.path.join(os.path.dirname(__file__), ".env"))
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
