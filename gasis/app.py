@@ -4,18 +4,18 @@ import google.generativeai as genai
 import json
 import os
 
-# Load environment variables (for Gemini API key)
-load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))  # Load explicitly
-config = dotenv_values(os.path.join(os.path.dirname(__file__), ".env"))
+# Load API key
+load_dotenv()
+config = dotenv_values(".env")
+
+# Configure generative AI
+genai.configure(api_key=config['GEMINI_API_KEY'])
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 # Load diseases data
 with open(os.path.join(os.path.dirname(__file__), 'diseases.json')) as f:
     diseases = json.load(f)
-
-# Initialize Gemini AI Client
-client = genai.Client(api_key=config['GEMINI_API_KEY'])
 
 @app.route("/")
 def home():
