@@ -5,15 +5,21 @@ function sendMessage(event) {
     let userMessage = inputField.value.trim();
     if (userMessage === "") return;
 
-    let chatbox = document.getElementById("messages");
+    let apiChatbox = document.getElementById("apiMessages");
+    let geminiChatbox = document.getElementById("geminiMessages");
 
-    // Display user message
-    let userDiv = document.createElement("div");
-    userDiv.textContent = "You: " + userMessage;
-    userDiv.style.fontWeight = "bold";
-    chatbox.appendChild(userDiv);
+    // Display user message in both chat windows
+    let userDiv1 = document.createElement("div");
+    userDiv1.textContent = "You: " + userMessage;
+    userDiv1.style.fontWeight = "bold";
+    apiChatbox.appendChild(userDiv1);
 
-    // Fetch diagnosis from the API
+    let userDiv2 = document.createElement("div");
+    userDiv2.textContent = "You: " + userMessage;
+    userDiv2.style.fontWeight = "bold";
+    geminiChatbox.appendChild(userDiv2);
+
+    // Fetch diagnosis from API
     fetch(`/diagnosis?symptoms=${userMessage}`)
         .then(response => response.json())
         .then(data => {
@@ -25,13 +31,27 @@ function sendMessage(event) {
             } else {
                 botDiv.innerHTML = "Bot: Possible diseases found:<br>";
                 data.forEach(disease => {
-                    botDiv.innerHTML += `<strong>${disease.name}</strong> (ICD-10: ${disease.icd10_codes}) <br> 
+                    botDiv.innerHTML += `<strong>${disease.name}</strong> (ICD-10: ${disease.icd10_codes}) <br>
                     <a href="${disease.info_link}" target="_blank">More info</a><br><br>`;
                 });
             }
-            chatbox.appendChild(botDiv);
-            chatbox.scrollTop = chatbox.scrollHeight;
+            apiChatbox.appendChild(botDiv);
+            apiChatbox.scrollTop = apiChatbox.scrollHeight;
         });
+
+    // Fetch response from Gemini AI
+    fetch('/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage })
+    })
+    .then(response => response.json())
+    .then(data => {
+        let geminiDiv = document.createElement("div");
+        geminiDiv.textContent = "Gemini: " + (data.response || "No response");
+        geminiChatbox.appendChild(geminiDiv);
+        geminiChatbox.scrollTop = geminiChatbox.scrollHeight;
+    });
 
     inputField.value = "";
 }
