@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Viewer</title>
+  <style>
+    :root {
+      --bg-dark: #1e1e1e;
+      --bg-darker: #121212;
+      --nav-bg: #2d2b55;
+      --text-color: #e0e0e0;
+      --key-color: #9cdcfe;
+      --string-color: #ce9178;
+      --number-color: #b5cea8;
+      --boolean-color: #569cd6;
+      --null-color: #569cd6;
+      --tab-active: #1e1e1e;
+      --tab-inactive: #2d2b55;
+      --button-bg: #3c3c3c;
+      --button-hover: #505050;
+      --highlight-line: #2d2d6b;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      background-color: var(--bg-dark);
+      color: var(--text-color);
+      font-size: 14px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .navbar {
+      background-color: var(--nav-bg);
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .nav-button {
+      background-color: transparent;
+      color: var(--text-color);
+      border: none;
+      border-radius: 4px;
+      padding: 2px 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .nav-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .address-bar {
+      flex-grow: 1;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+      padding: 4px 8px;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+    }
+    
+    .icon {
+      padding: 0 4px;
+    }
+    
+    .tabs {
+      display: flex;
+      background-color: var(--bg-darker);
+    }
+    
+    .tab {
+      padding: 8px 16px;
+      cursor: pointer;
+      background-color: var(--tab-inactive);
+      border-right: 1px solid var(--bg-darker);
+    }
+    
+    .tab.active {
+      background-color: var(--tab-active);
+    }
+    
+    .toolbar {
+      display: flex;
+      padding: 8px;
+      background-color: var(--bg-darker);
+      border-bottom: 1px solid #333;
+    }
+    
+    .toolbar-button {
+      background-color: var(--button-bg);
+      color: var(--text-color);
+      border: none;
+      border-radius: 3px;
+      padding: 4px 8px;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    
+    .toolbar-button:hover {
+      background-color: var(--button-hover);
+    }
+    
+    .json-container {
+      overflow: auto;
+      flex-grow: 1;
+      padding: 0;
+      position: relative;
+    }
+    
+    .line {
+      padding: 0;
+      display: flex;
+      align-items: flex-start;
+    }
+    
+    .line:hover {
+      background-color: rgba(45, 45, 60, 0.3);
+    }
+    
+    .line.highlight {
+      background-color: var(--highlight-line);
+    }
+    
+    .line-number {
+      user-select: none;
+      text-align: right;
+      color: #666;
+      padding: 0 8px;
+      min-width: 30px;
+      border-right: 1px solid #333;
+    }
+    
+    .line-content {
+      padding: 0 8px;
+      white-space: pre;
+    }
+    
+    .toggle {
+      cursor: pointer;
+      display: inline-block;
+      width: 12px;
+      text-align: center;
+    }
+    
+    .indent {
+      display: inline-block;
+      width: 20px;
+    }
+    
+    .key {
+      color: var(--key-color);
+    }
+    
+    .string {
+      color: var(--string-color);
+    }
+    
+    .number {
+      color: var(--number-color);
+    }
+    
+    .boolean {
+      color: var(--boolean-color);
+    }
+    
+    .null {
+      color: var(--null-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <button class="nav-button">←</button>
+    <button class="nav-button">→</button>
+    <button class="nav-button">↻</button>
+    <div class="address-bar">
+      <span>127.0.0.1:5000/diagnosis?symptoms=headache,fever,vomiting</span>
+    </div>
+    <button class="nav-button">120%</button>
+    <button class="nav-button">☆</button>
+    <button class="nav-button">❤</button>
+    <button class="nav-button">↓</button>
+    <button class="nav-button">S</button>
+    <button class="nav-button">👍</button>
+    <button class="nav-button">≡</button>
+  </div>
+  
+  <div class="tabs">
+    <div class="tab active">JSON</div>
+    <div class="tab">Raw Data</div>
+    <div class="tab">Headers</div>
+  </div>
+  
+  <div class="toolbar">
+    <button class="toolbar-button">Save</button>
+    <button class="toolbar-button">Copy</button>
+    <button class="toolbar-button">Collapse All</button>
+    <button class="toolbar-button">Expand All</button>
+    <button class="toolbar-button">🔍 Filter JSON</button>
+  </div>
+  
+  <div class="json-container" id="jsonViewer">
+    <!-- JSON content will be populated by JavaScript -->
+  </div>
+
+  <script>
+    // Function to create a syntax-highlighted JSON viewer
+    function createJsonViewer(data, containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = ''; // Clear container
+      
+      // Create line numbering and content
+      let lineNumber = 0;
+      
+      function addLine(content, indentLevel = 0, isCollapsible = false, highlight = false) {
+        const line = document.createElement('div');
+        line.className = 'line' + (highlight ? ' highlight' : '');
+        
+        const lineNum = document.createElement('div');
+        lineNum.className = 'line-number';
+        lineNum.textContent = lineNumber;
+        
+        const lineContent = document.createElement('div');
+        lineContent.className = 'line-content';
+        
+        // Add indentation
+        let indentSpan = '';
+        for (let i = 0; i < indentLevel; i++) {
+          indentSpan += '<span class="indent"></span>';
+        }
+        
+        // Add toggle if needed
+        if (isCollapsible) {
+          indentSpan += '<span class="toggle">▼</span>';
+        } else if (indentLevel > 0) {
+          indentSpan += '<span class="indent"></span>';
+        }
+        
+        lineContent.innerHTML = indentSpan + content;
+        
+        line.appendChild(lineNum);
+        line.appendChild(lineContent);
+        container.appendChild(line);
+        
+        lineNumber++;
+        return lineContent;
+      }
+      
+      function renderJson(obj, indentLevel = 0) {
+        if (Array.isArray(obj)) {
+          // Array
+          const arrayOpenLine = addLine('[', indentLevel, true);
+          
+          obj.forEach((item, index) => {
+            const isLast = index === obj.length - 1;
+            if (typeof item === 'object' && item !== null) {
+              renderJson(item, indentLevel + 1);
+              if (!isLast) {
+                addLine(',', indentLevel + 1);
+              }
+            } else {
+              const valueFormatted = formatValue(item);
+              addLine(valueFormatted + (isLast ? '' : ','), indentLevel + 1);
+            }
+          });
+          
+          addLine(']', indentLevel);
+        } else if (typeof obj === 'object' && obj !== null) {
+          // Object
+          const objOpenLine = addLine('{', indentLevel, true);
+          
+          const keys = Object.keys(obj);
+          keys.forEach((key, index) => {
+            const isLast = index === keys.length - 1;
+            const formattedKey = `<span class="key">"${key}"</span>: `;
+            
+            if (typeof obj[key] === 'object' && obj[key] !== null) {
+              addLine(formattedKey, indentLevel + 1, false, key === "treatments");
+              renderJson(obj[key], indentLevel + 1);
+              if (!isLast) {
+                addLine(',', indentLevel + 1);
+              }
+            } else {
+              const valueFormatted = formatValue(obj[key]);
+              addLine(formattedKey + valueFormatted + (isLast ? '' : ','), indentLevel + 1, false, key === "treatments");
+            }
+          });
+          
+          addLine('}', indentLevel);
+        }
+      }
+      
+      function formatValue(value) {
+        if (typeof value === 'string') {
+          return `<span class="string">"${value}"</span>`;
+        } else if (typeof value === 'number') {
+          return `<span class="number">${value}</span>`;
+        } else if (typeof value === 'boolean') {
+          return `<span class="boolean">${value}</span>`;
+        } else if (value === null) {
+          return `<span class="null">null</span>`;
+        } else {
+          return String(value);
+        }
+      }
+      
+      // Start rendering
+      renderJson(data);
+      
+      // Add toggle functionality
+      const toggles = document.querySelectorAll('.toggle');
+      toggles.forEach(toggle => {
+        toggle.addEventListener('click', () => {
+          const isCollapsed = toggle.textContent === '▶';
+          toggle.textContent = isCollapsed ? '▼' : '▶';
+          
+          // Find all sibling elements until the matching closing bracket
+          let currentLine = toggle.parentElement.parentElement;
+          let targetIndentLevel = parseInt(toggle.parentElement.querySelectorAll('.indent').length);
+          let nextLine = currentLine.nextElementSibling;
+          
+          while (nextLine) {
+            const nextIndentSpans = nextLine.querySelectorAll('.line-content .indent').length;
+            
+            if (nextIndentSpans <= targetIndentLevel) {
+              break;
+            }
+            
+            nextLine.style.display = isCollapsed ? 'flex' : 'none';
+            nextLine = nextLine.nextElementSibling;
+          }
+        });
+      });
+    }
+    
+    // Initialize the viewer
+    createJsonViewer(jsonData, 'jsonViewer');
+    
+    // Add functionality to toolbar buttons
+    document.querySelector('.toolbar-button:nth-child(3)').addEventListener('click', () => {
+      const toggles = document.querySelectorAll('.toggle');
+      toggles.forEach(toggle => {
+        if (toggle.textContent === '▼') {
+          toggle.click();
+        }
+      });
+    });
+    
+    document.querySelector('.toolbar-button:nth-child(4)').addEventListener('click', () => {
+      const toggles = document.querySelectorAll('.toggle');
+      toggles.forEach(toggle => {
+        if (toggle.textContent === '▶') {
+          toggle.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
