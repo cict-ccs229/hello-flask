@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnosis Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Medical Diagnosis Chatbot</h1>
+        <div class="chat-container">
+            <div class="chatbox" id="apiMessages">
+                <h3>API Response</h3>
+            </div>
+            <div class="chatbox" id="geminiMessages">
+                <h3>Gemini AI Response</h3>
+            </div>
+        </div>
+        <input type="text" id="userInput" placeholder="Enter symptoms..." onkeypress="sendMessage(event)">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

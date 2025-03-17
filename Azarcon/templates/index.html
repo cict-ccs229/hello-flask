@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagnosify</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="container mx-auto p-4 pt-12">
+        <h1 class="text-4xl font-bold text-center mb-2">Diagnosify</h1>
+        <h2 class="text-lg text-center mb-8">Disease Database and Proactive Diagnosis</h2>
+        
+        <div class="flex justify-center mb-4">
+            <button id="toggleLookup" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-l-lg">Lookup</button>
+            <button id="toggleDiagnosis" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-r-lg">Diagnosis</button>
+        </div>
+
+        <form id="lookupForm" action="/lookup" method="post" class="max-w-xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg">
+            <label for="query" class="block text-sm font-medium mb-2">Search Disease Name / ICD Code:</label>
+            <input type="text" id="query" name="query" required class="w-full p-2 mb-4 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit" class="w-full text-white font-bold py-2 px-4 rounded-lg" style="background-color: #6b8ed6;">Lookup</button>
+        </form>
+
+        <form id="diagnosisForm" action="/diagnosis" method="get" class="max-w-xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg hidden">
+            <label for="symptoms" class="block text-sm font-medium mb-2">Enter Symptoms:</label>
+            <input type="text" id="symptoms" name="symptoms" placeholder="e.g., fever, cough, headache" required class="w-full p-2 mb-4 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit" class="w-full text-white font-bold py-2 px-4 rounded-lg" style="background-color: #6b8ed6;">Diagnose</button>
+        </form>
+
+        <div class="max-w-xl mx-auto mt-8">
+            <div id="results"></div>
+            <div class="spinner" id="spinner"></div>
+        </div>
+    </div>
+
+    <script src="/static/scripts.js"></script>
+</body>
+</html>
