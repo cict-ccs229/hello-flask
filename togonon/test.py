@@ -5,10 +5,9 @@ import os
 from dotenv import load_dotenv
 import google.generativeai as genai
 
-# Explicitly load the .env file (adjust the path if necessary)
 load_dotenv("D:/Togonon/hello-flask/togonon/.env")
 
-# Retrieve the API key using os.getenv()
+
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 genai.configure(api_key=GEMINI_API_KEY)
