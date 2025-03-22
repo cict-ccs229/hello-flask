@@ -3,19 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Disease Search</title>
+    <title>Diagnostica</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
-        <h1 class="text-2xl font-bold mb-4 text-center">Disease Search</h1>
-        
-        <input type="text" id="searchInput" class="w-full p-2 border rounded-lg" placeholder="Search for a disease...">
-        
-        <ul id="suggestions" class="mt-2 border rounded-lg bg-white max-h-40 overflow-y-auto hidden"></ul>
-        
-        <div id="diseaseInfo" class="mt-4 p-4 border rounded-lg hidden"></div>
+<body class="bg-gray-50 min-h-screen p-6">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-blue-600">Diagnostica</h1>
+            <p class="text-gray-600">Enter your symptoms to get a diagnosis.</p>
+        </header>
+
+        <!-- Search Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-10">
+            <!-- Symptom Input Section -->
+            <div class="mb-6">
+                <label for="symptomInput" class="block text-lg font-semibold text-gray-700 mb-2">Search Symptoms</label>
+                <div class="relative">
+                    <input id="symptomInput" type="text" placeholder="e.g., headache, fever..." 
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        oninput="fetchSuggestions()">
+                    <ul id="suggestions" class="absolute w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg hidden"></ul>
+                </div>
+            </div>
+
+            <!-- Selected Symptoms Section -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">Selected Symptoms</h3>
+                <div id="selectedSymptoms" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <!-- Search Button -->
+            <button onclick="getDiagnosis()" 
+                    class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition duration-200">
+                Search 
+            </button>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="mt-4 text-red-500 text-sm hidden">
+                Please select at least one symptom to get a diagnosis.
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+            <div class="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-4">
+                <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-gray-700">Analyzing symptoms...</p>
+            </div>
+        </div>
+
+        <!-- Diagnosis Results Section -->
+        <div id="results" class="hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Diagnosis Results</h3>
+                <div id="diseaseList" class="space-y-4"></div>
+            </div>
+        </div>
     </div>
+
+    <!-- Popup Modal -->
+    <div id="diseaseModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+        <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-md">
+            <!-- Modal Header -->
+            <h2 id="modalDiseaseName" class="text-xl font-bold text-center bg-blue-500 text-white p-4 rounded-t-lg"></h2>
+            <!-- Modal Body -->
+            <div class="p-6">
+                <p class="mb-3"><strong class="text-gray-700">Description:</strong> <span id="modalDescription" class="text-gray-600"></span></p>
+                <p class="mb-3"><strong class="text-gray-700">Effects:</strong> <span id="modalEffects" class="text-gray-600"></span></p>
+                <p class="mb-3"><strong class="text-gray-700">Causes:</strong> <span id="modalCauses" class="text-gray-600"></span></p>
+                <p class="mb-3"><strong class="text-gray-700">Remedies:</strong> <span id="modalRemedies" class="text-gray-600"></span></p>
+            </div>
+            <!-- Modal Footer -->
+            <div class="text-center p-4 border-t border-gray-200">
+                <button onclick="closeModal()" 
+                        class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition duration-200">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedSymptoms = [];
+
+        async function fetchSuggestions() {
+            const input = document.getElementById('symptomInput').value.toLowerCase();
+            const suggestionsBox = document.getElementById('suggestions');
+            suggestionsBox.innerHTML = '';
+            suggestionsBox.classList.add('hidden');
+
+            if (input.length > 1) {
+                const response = await fetch(`/symptom-suggestions?query=${input}`);
+                const suggestions = await response.json();
+                
+                suggestions.forEach(symptom => {
+                    const li = document.createElement('li');
+                    li.textContent = symptom;
+                    li.classList.add('p-3', 'hover:bg-gray-100', 'cursor-pointer', 'text-gray-700');
+                    li.onclick = () => addSymptom(symptom);
+                    suggestionsBox.appendChild(li);
+                });
+                
+                if (suggestions.length > 0) {
+                    suggestionsBox.classList.remove('hidden');
+                }
+            }
+        }
+
+        function addSymptom(symptom) {
+            if (!selectedSymptoms.includes(symptom)) {
+                selectedSymptoms.push(symptom);
+                updateSelectedSymptoms();
+            }
+            document.getElementById('symptomInput').value = '';
+            document.getElementById('suggestions').classList.add('hidden');
+        }
+
+        function updateSelectedSymptoms() {
+            const container = document.getElementById('selectedSymptoms');
+            container.innerHTML = '';
+            selectedSymptoms.forEach(symptom => {
+                const div = document.createElement('div');
+                div.classList.add('bg-blue-100', 'px-4', 'py-2', 'rounded-full', 'flex', 'items-center', 'gap-2', 'text-blue-700');
+                div.innerHTML = `${symptom} <span class="cursor-pointer text-red-500 hover:text-red-600" onclick="removeSymptom('${symptom}')">&times;</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function removeSymptom(symptom) {
+            selectedSymptoms = selectedSymptoms.filter(s => s !== symptom);
+            updateSelectedSymptoms();
+        }
+
+        async function getDiagnosis() {
+            const errorMessage = document.getElementById('errorMessage');
+            const resultsSection = document.getElementById('results');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            if (selectedSymptoms.length === 0) {
+                errorMessage.classList.remove('hidden');
+                resultsSection.classList.add('hidden');
+                return;
+            } else {
+                errorMessage.classList.add('hidden');
+            }
+
+            // Show loading spinner
+            loadingSpinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`/diagnosis?symptoms=${selectedSymptoms.join(',')}`);
+                const data = await response.json();
+
+                const diseaseList = document.getElementById('diseaseList');
+                diseaseList.innerHTML = '';
+                data.forEach(disease => {
+                    const div = document.createElement('div');
+                    div.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'hover:shadow-lg', 'transition-shadow', 'cursor-pointer');
+                    div.innerHTML = `
+                        <strong class="text-blue-600">${disease.primary_name}</strong>
+                        <p class="text-gray-600 mt-2">${disease.description}</p>
+                    `;
+                    div.onclick = () => openModal(disease);
+                    diseaseList.appendChild(div);
+                });
+
+                resultsSection.classList.remove('hidden');
+            } catch (error) {
+                console.error("Error fetching diagnosis:", error);
+                alert("An error occurred while fetching the diagnosis. Please try again.");
+            } finally {
+                // Hide loading spinner
+                loadingSpinner.classList.add('hidden');
+            }
+        }
+
+        function openModal(disease) {
+            document.getElementById('modalDiseaseName').textContent = disease.primary_name;
+            document.getElementById('modalDescription').textContent = disease.description;
+            document.getElementById('modalEffects').textContent = disease.effects;
+            document.getElementById('modalCauses').textContent = disease.causes;
+            document.getElementById('modalRemedies').textContent = disease.remedies.join(', ');
+            document.getElementById('diseaseModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('diseaseModal').classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
