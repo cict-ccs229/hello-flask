@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Diagnosis Chat</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Roboto:wght@300;400;700&display=swap">
+    <link rel="stylesheet" href="static/styles.css">
+    <style>
+        /* Add these styles to override the centered text */
+        #formatted-diagnosis {
+            text-align: left;
+        }
+        
+        /* Keep the heading centered but the content left-aligned */
+        .container {
+            text-align: center;
+        }
+        
+        .container > div {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-container">
+        <h1>AI Diagnosis</h1>
+
+    <form action="/chat" method="post" class="mt-3">
+        <div class="symptom-form">
+            <label for="symptoms">Enter key terms:</label>
+            <input type="text" id="symptoms" name="symptoms" placeholder="e.g., fever, cough, nausea" required>
+        </div>
+        <button type="submit">Get Diagnosis</button>
+    </form>
+    </div>
+    
+    {% if diagnosis %}
+    <div class="container" id="results">
+        <h4>Diagnosis Result:</h4>
+        <div id="formatted-diagnosis" class="p-2 border rounded bg-white"></div>
+    </div>
+
+    
+    <script>
+        let rawText = `{{ diagnosis | safe }}`;
+        let cleanedText = rawText.trim();
+        
+        // Format the text for display
+        let formattedText = cleanedText
+            .replace(/\n/g, "<br>")
+            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+            .replace(/\*(.*?)\*/g, "<em>$1</em>")
+            .replace(/- /g, "&bull; ");
+        
+        document.getElementById("formatted-diagnosis").innerHTML = formattedText;
+        document.getElementById("results").style.display = "block";
+    </script>
+    {% endif %}
+</body>
+</html>
