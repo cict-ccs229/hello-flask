@@ -27,6 +27,18 @@ app = Flask(__name__)
 # Get the absolute path to the diseases.json file
 diseases_path = os.path.join(os.path.dirname(__file__), 'diseases.json')
 
+# Load diseases data from JSON file with error handling
+try:
+    print(f"Looking for diseases.json at: {diseases_path}")
+    with open(diseases_path, 'r') as f:
+        diseases = json.load(f)
+except FileNotFoundError:
+    print(f"Error: 'diseases.json' not found at {diseases_path}")
+    diseases = []
+except json.JSONDecodeError:
+    print(f"Error: 'diseases.json' contains invalid JSON")
+    diseases = []
+
 # Load diseases data from JSON file
 with open(diseases_path) as f:
     diseases = json.load(f)
