@@ -1,171 +1,102 @@
-from flask import Flask, request, jsonify, render_template_string
-import json
 import os
-from google import genai
-from pydantic import BaseModel
-from requests.exceptions import RequestException
+import json
+import re
+from flask import Flask, jsonify, render_template, request
 from dotenv import load_dotenv, dotenv_values
+import google.generativeai as genai
 
-class Disease(BaseModel):
-    key_id: str
-    primary_name: str
-    consumer_name: str
-    word_synonyms: str
-    synonyms: list[str]
-    info_link_data: list[list[str]]
-
+# Load environment variables
 load_dotenv()
 config = dotenv_values(".env")
-client = genai.Client(api_key=config['GEMINI_API_KEY'])
+
+genai.configure(api_key=config['GEMINI_API_KEY'])
 
 app = Flask(__name__)
 
-diseases = []
-
-# Get the directory where the script is running
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-JSON_FILE = os.path.join(BASE_DIR, "diseases.json")
+JSON_PATH = os.path.join(BASE_DIR, "diseases.json")
 
-# Load the disease data from the JSON file
-try:
-    with open(JSON_FILE, "r") as file:
-        diseases = json.load(file)
-except FileNotFoundError:
-    diseases = []  # If file is missing, start with an empty list
+print(f"Loading JSON from: {JSON_PATH}")  # Debugging output
 
-# HTML + CSS Template
-HTML_TEMPLATE = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diseases Information</title>
-    <style>
-        /* General Page Styles */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        
-        /* Header Styling */
-        h1 {
-            text-align: center;
-            color: #007bff;
-        }
+if not os.path.exists(JSON_PATH):
+    raise FileNotFoundError(f"❌ File not found: {JSON_PATH}")
 
-        /* Search Box */
-        input[type="text"] {
-            width: 100%;
-            max-width: 400px;
-            padding: 10px;
-            margin: 20px auto;
-            display: block;
-            border: 2px solid #007bff;
-            border-radius: 5px;
-            font-size: 16px;
-        }
+with open(JSON_PATH, "r", encoding="utf-8") as file:
+    diseases = json.load(file)
 
-        /* Search Results */
-        #results {
-            margin-top: 20px;
-            padding: 10px;
-        }
 
-        /* Disease List */
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        li {
-            background: #fff;
-            margin: 10px 0;
-            padding: 15px;
-            border-left: 5px solid #007bff;
-            border-radius: 5px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Links */
-        a {
-            color: #007bff;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            input[type="text"] {
-                width: 90%;
-            }
-        }
-    </style>
-    <script>
-        function searchDisease() {
-            let query = document.getElementById("search").value.toLowerCase();
-            fetch(`/search?q=${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    let resultsDiv = document.getElementById("results");
-                    resultsDiv.innerHTML = "";
-                    if (data.length === 0) {
-                        resultsDiv.innerHTML = "<p>No results found.</p>";
-                    } else {
-                        data.forEach(disease => {
-                            let infoLink = disease.info_link_data.length ? 
-                                `<a href="${disease.info_link_data[0][0]}" target="_blank">${disease.info_link_data[0][1]}</a>` 
-                                : 'No Link Available';
-                            resultsDiv.innerHTML += `<p><strong>${disease.primary_name}</strong> - ${infoLink}</p>`;
-                        });
-                    }
-                });
-        }
-    </script>
-</head>
-<body>
-    <h1>Diseases Information</h1>
-    <input type="text" id="search" placeholder="Search for a disease..." onkeyup="searchDisease()">
-    <div id="results"></div>
-    
-    <h2>All Diseases</h2>
-    <ul>
-        {% for disease in diseases %}
-            <li><strong>{{ disease.primary_name }}</strong> - 
-                <a href="{{ disease.info_link_data[0][0] if disease.info_link_data else '#' }}" target="_blank">
-                {{ disease.info_link_data[0][1] if disease.info_link_data else 'No Link Available' }}
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
-"""
-
-@app.route('/')
+@app.route("/")
 def home():
-    return render_template_string(HTML_TEMPLATE, diseases=diseases)
+    """Serve the frontend"""
+    return render_template("index.html")
 
-@app.route('/search', methods=['GET'])
-def search():
-    query = request.args.get('q', '').lower()
+@app.route("/search", methods=["GET"])
+def search_diseases():
+    """Search for diseases by name or synonyms"""
+    query = request.args.get("q", "").strip().lower()
+    if not query:
+        return jsonify([])
+
     results = []
-
-    for d in diseases:
-        # Check if the query matches primary name, synonyms, or ICD codes
-        if (query in d['primary_name'].lower() or
-            any(query in syn.lower() for syn in d.get('synonyms', [])) or
-            any(query in code['code'].lower() for code in d.get('icd10cm', []))):
-            results.append(d)
     
+    for disease in diseases:
+        name_match = query in disease["primary_name"].lower()
+        synonym_match = any(query in synonym.lower() for synonym in disease.get("synonyms", []))
+
+        if name_match or synonym_match:
+            results.append({
+                "key_id": disease["key_id"],
+                "primary_name": disease["primary_name"],
+                "is_procedure": bool(disease.get("is_procedure", False)),  
+                "synonyms": disease.get("synonyms", []),
+                "icd10cm": disease.get("icd10cm", []),
+                "info_links": disease.get("info_link_data", [])
+            })
+
     return jsonify(results)
 
-if __name__ == '__main__':
+@app.route("/gemini-response", methods=["GET"])
+def gemini_response():
+    """Generate disease details using Gemini"""
+    key_id = request.args.get("key_id", "").strip()
+    
+    if not key_id:
+        return jsonify({"error": "No key_id provided"}), 400
+
+    # Find the disease by key_id
+    disease = next((d for d in diseases if d["key_id"] == key_id), None)
+    
+    if not disease:
+        return jsonify({"error": "Disease not found"}), 404
+
+    try:
+        # Initialize the generative model
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')  
+
+        # Generate content
+        response = model.generate_content(
+            f"Provide detailed information about the following disease: {disease['primary_name']}\n"
+            "Return the response in valid JSON format with these fields:\n"
+            "- primary_name: The name of the disease\n"
+            "- description: A brief overview of the disease in 3 sentences\n"
+            "- symptoms: Common symptoms associated with the disease in 2 sentences\n"
+            "- treatment: Effective treatments or remedies in 5 sentences\n"
+        )
+
+        raw_response = response.text
+        print("AI Raw Response:", raw_response)  # Debugging output
+
+        # Remove markdown formatting if present
+        cleaned_response = re.sub(r"```json\s*([\s\S]*?)\s*```", r"\1", raw_response).strip()
+
+        try:
+            disease_data = json.loads(cleaned_response)
+            return jsonify(disease_data)
+        except json.JSONDecodeError:
+            return jsonify({"error": "Invalid response from AI", "raw_response": cleaned_response}), 500
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to generate response: {str(e)}"}), 500
+
+if __name__ == "__main__":
     app.run(debug=True)

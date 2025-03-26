@@ -12,6 +12,17 @@ app = Flask(__name__)
 with open(os.path.join(os.path.dirname(__file__), 'diseases.json')) as f:
     diseases = json.load(f)
 
+if os.getenv("RENDER") is None:  # 'RENDER' is set automatically on Render's environment
+    load_dotenv()
+
+api_key = os.getenv("GEMINI_API_KEY")
+
+if not api_key:
+    raise ValueError("GEMINI_API_KEY is missing from environment variables.")
+
+client = genai.Client(api_key=api_key)
+
+
 class Diagnosis(BaseModel):
     key_id: str
     primary_name: str
@@ -19,13 +30,8 @@ class Diagnosis(BaseModel):
     word_synonyms: str
     synonyms: list[str]
     info_link_data: list[list[str]]
-
-load_dotenv()
-config = dotenv_values(".env")
-client = genai.Client(api_key=config['GEMINI_API_KEY'])
-
-app = Flask(__name__)
-
+    description: str
+    remedies: str
 
 @app.route('/')
 def index():
@@ -91,7 +97,7 @@ def get_diagnosis():
     "This is the existing data in JSON format: " + json.dumps(diseases),
     "Match the closest disease with following symptoms: " + symptoms,
     "Include the info_link_data in the response.",
-    "Return the top three matching items."
+    "Return the top three matching items with primary name, description, and possible remedies."
     ],
 
     config={
@@ -99,8 +105,7 @@ def get_diagnosis():
     "response_schema": list[Diagnosis]
     }
     )
-    return json.loads(response.text)
-
+    return jsonify(json.loads(response.text))
 
 if __name__ == '__main__':
     app.run(debug=True)

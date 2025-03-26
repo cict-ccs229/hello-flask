@@ -1,5 +1,10 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify, render_template
+from dotenv import load_dotenv, dotenv_values
+from google import genai
+from pydantic import BaseModel
 import json
+import os
+import requests
 
 app = Flask(__name__)
 
@@ -17,6 +22,9 @@ def load_diseases():
         }
 
 diseases = load_diseases()
+load_dotenv()
+config = dotenv_values(".env")
+client = genai.Client(api_key=config['GEMINI_API_KEY'])
 
 @app.route("/")
 def index():
