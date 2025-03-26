@@ -2,19 +2,22 @@ from flask import Flask, request, jsonify, render_template
 import json
 from google import genai
 import os
-from dotenv import load_dotenv, dotenv_values
+from dotenv import load_dotenv
 
 # Initialization
 app = Flask(__name__)
-load_dotenv(dotenv_path="malatuba/.env")
+# print(os.access("/malatuba/.env", os.R_OK))
+load_dotenv(dotenv_path=".env")
 
+api_ey = os.environ.get('GENAI_API_KEY')
+print(api_ey)
 # Load diseases data from JSON file
 with open("diseases.json", "r") as file:
     diseases = json.load(file)
 
 # Set up Gemini AI
-config = dotenv_values(".env")
-client = genai.Client(api_key=config["GENAI_API_KEY"])
+
+client = genai.Client(api_key= api_ey)
 
 # Render the HTML
 @app.route("/")
