@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disease Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Disease Search</h1>
+    <form action="/" method="get">
+        <input type="text" name="query" value="{{ query }}" placeholder="Enter symptoms...">
+        <button type="submit">Search</button>
+    </form>
+    <ul>
+        {% for disease in results %}
+            <li>
+                <strong>Primary Name:</strong> {{ disease.primary_name }}<br>
+                <strong>Consumer Name:</strong> {{ disease.consumer_name }}<br>
+                {% if disease.info_link_data %}
+                    <span class="info-text">For more info click the link below</span><br>
+                    <a href="{{ disease.info_link_data[0][0] }}" class="info-link" target="_blank">{{ disease.info_link_data[0][0] }}</a><br>
+                {% else %}
+                    <span class="info-text">No further info available</span><br>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

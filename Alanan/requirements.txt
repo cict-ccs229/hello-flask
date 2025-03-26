@@ -1,0 +1,3 @@
+Flask
+gunicorn
+AIzaSyCtNw4x5-KUeQacmrxtKACcIIqRtRRrmco

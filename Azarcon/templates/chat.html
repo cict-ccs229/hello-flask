@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Diagnosis</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-4">Disease Diagnosis Chat</h1>
+        <form action="/chat" method="post" class="bg-white p-6 rounded shadow-md">
+            <label for="symptoms" class="block text-gray-700">Enter your symptoms (comma separated):</label>
+            <input type="text" id="symptoms" name="symptoms" class="mt-2 p-2 border border-gray-300 rounded w-full" required>
+            <button type="submit" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded">Get Diagnosis</button>
+        </form>
+        {% if diagnosis %}
+        <div id="diagnosis-result" class="mt-4 bg-white p-6 rounded shadow-md">
+            <h2 class="text-xl font-bold mb-2">Diagnosis Result:</h2>
+            <p>{{ diagnosis }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
