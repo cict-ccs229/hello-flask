@@ -1,39 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Diseases Search</title>
+    <title>Zoogle</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
             text-align: center;
-            margin-top: 50px;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px 0;
         }
         .search-container {
-            margin-bottom: 20px;
+            margin: 20px 0;
         }
         input[type="text"] {
-            width: 50%;
+            width: 60%;
             padding: 10px;
             font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
         button {
             padding: 10px 20px;
             font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
         }
         .results {
             margin-top: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .result-item {
+            margin-bottom: 20px;
+        }
+        .result-item h2 {
+            color: #4CAF50;
+        }
+        .result-item p {
+            margin: 10px 0;
+        }
+        .result-item a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .result-item a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to Doogle</h1>
-    <div class="search-container">
-        <form id="searchForm">
-            <input type="text" id="searchQuery" placeholder="Enter disease name, ICD-9 text, or word synonym">
-            <button type="submit">Search</button>
-        </form>
+    <div class="container">
+        <div class="header">
+            <h1>Zoogle</h1>
+        </div>
+        <div class="search-container">
+            <form id="searchForm">
+                <input type="text" id="searchQuery" placeholder="Enter symptoms">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <div class="results" id="results"></div>
     </div>
-    <div class="results" id="results"></div>
 
     <script>
         document.getElementById('searchForm').addEventListener('submit', function(event) {
@@ -41,20 +88,26 @@
             const query = document.getElementById('searchQuery').value.toLowerCase();
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '';
-            fetch('/diseases')
+            fetch(`/diagnose?symptoms=${query}`)
                 .then(response => response.json())
                 .then(data => {
-                    const disease = data.find(d => 
-                        d.primary_name.toLowerCase() === query ||
-                        (d.term_icd9_text && d.term_icd9_text.toLowerCase() === query) ||
-                        (d.word_synonyms && d.word_synonyms.toLowerCase().includes(query))
-                    );
-                    if (disease) {
-                        const infoLinks = disease.info_link_data.map(link => `<a href="${link[0]}">${link[1]}</a>`).join('<br>');
-                        resultsDiv.innerHTML = `<h2>Information Links:</h2>${infoLinks}`;
+                    console.log("Received Data:", data);  // Debugging output
+                    if (data.error) {
+                        resultsDiv.innerHTML = `<p>${data.error}</p>`;
                     } else {
-                        resultsDiv.innerHTML = '<p>No disease found with that name, ICD-9 text, or word synonym.</p>';
+                        const infoLinks = data.map(disease => 
+                            `<div class="result-item">
+                                <h2>${disease.primary_name}</h2>
+                                <p>${disease.description}</p>
+                                <p><strong>Info Links:</strong> ${disease.info_link_data ? disease.info_link_data.map(link => `<a href="${link[0]}">${link[1]}</a>`).join('<br>') : 'No links available'}</p>
+                                <p><strong>Doctor's Advice:</strong> ${disease.doctor_response}</p>
+                            </div>`
+                        ).join('<hr>');
+                        resultsDiv.innerHTML = infoLinks;
                     }
+                })
+                .catch(error => {
+                    resultsDiv.innerHTML = `<p>Error fetching data: ${error.message}</p>`;
                 });
         });
     </script>
