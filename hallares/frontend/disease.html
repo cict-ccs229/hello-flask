@@ -12,7 +12,7 @@
 
     <div class="relative z-10 flex flex-col items-center text-center">
 
-        <h1 class="text-5xl font-extrabold mb-8 tracking-wide drop-shadow-lg animate-bounce">Disease Details</h1>
+        <h1 class="text-5xl font-extrabold mb-8 tracking-wide drop-shadow-lg">Disease Details</h1>
 
         <div class="bg-white bg-opacity-20 backdrop-blur-md shadow-2xl rounded-3xl p-10 w-[500px] h-auto flex flex-col items-center justify-center transform transition duration-300 hover:scale-105">
             
@@ -22,6 +22,9 @@
                 <p class="text-lg"><strong>Name:</strong> {{ disease.primary_name }}</p>
                 <p class="text-lg"><strong>ICD-10 Code:</strong> {{ disease.icd10cm_codes if disease.icd10cm_codes else "Not available" }}</p>
                 <p class="text-lg"><strong>Synonyms:</strong> {{ ', '.join(disease.synonyms) if disease.synonyms else "None" }}</p>
+                <br>
+                <h3>AI Suggestion:</h3>
+                <p>{{ ai_suggestion }}</p>
 
                 {% if disease.term_icd9_text %}
                     <p class="mt-4 text-md"><strong>Description:</strong> {{ disease.term_icd9_text }}</p>
