@@ -14,8 +14,12 @@ class Diagnosis(BaseModel):
     info_link_data: list[list[str]]
 
 load_dotenv()
-config = dotenv_values(".env")
-client = genai.Client(api_key=config['GEMINI_API_KEY'])
+gemini_api_key = os.getenv("GEMINI_API_KEY")
+
+if not gemini_api_key:
+    raise ValueError("GEMINI_API_KEY is not set in the environment variables or .env file.")
+
+client = genai.Client(api_key=gemini_api_key)
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 json_path = os.path.join(BASE_DIR, "hallares", "diseases.json")
