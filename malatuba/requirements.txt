@@ -1,4 +1,5 @@
 Flask
+dotenv
 requests
 gunicorn
 python-dotenv
