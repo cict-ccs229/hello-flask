@@ -1,0 +1,15 @@
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-WTF
+Flask-Login
+Flask-Bcrypt
+python-dotenv
+google-generativeai
+unicorn
+Flask-Cors
+google-auth
+requests
+gunicorn
+websockets
+Werkzeug
