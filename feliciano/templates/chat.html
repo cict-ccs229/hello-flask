@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot Diagnosis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+     <style>
+        body {
+            background-color: aliceblue;
+        }
+        h1 {
+            color: #2C3E50;
+            font-family: 'Times New Roman', Times, serif;
+        }
+         .btn.btn-primary {
+            padding: 8px 16px;
+            background-color: #3498DB;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .btn.btn-primary:hover {
+            background-color: #2980B9;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h1>Disease Diagnosis Chatbot</h1>
+    <form method="POST" action="{{ url_for('chat') }}">
+        <div class="form-group">
+            <label for="symptoms">Enter Symptoms (comma-separated):</label>
+            <input type="text" name="symptoms" id="symptoms" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Get Diagnosis</button>
+    </form>
+
+    {% if diagnosis %}
+    <div class="mt-4 p-3 border rounded bg-light">
+        <h4>Preliminary Diagnosis</h4>
+        <p>{{ diagnosis|safe }}</p>
+        <div class="alert alert-warning mt-3">
+            <strong>Note:</strong> This is a preliminary result. Please consult a healthcare provider for a proper diagnosis.
+        </div>
+    </div>
+    {% endif %}
+</div>
+</body>
+</html>
