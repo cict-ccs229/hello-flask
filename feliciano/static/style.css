@@ -1,0 +1,87 @@
+/* styles.css */
+
+body {
+    background-color: aliceblue;
+}
+
+/* Container and overall layout */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Heading styles */
+h1 {
+    text-align: center;
+    color: #2C3E50;
+    font-size: 36px;
+    margin-top: 50px;
+}
+
+/* Form input styling */
+.form-group {
+    margin-bottom: 15px;
+}
+
+#symptoms {
+    font-size: 1.1em;
+}
+
+/* Button styling */
+.btn.btn-primary {
+    padding: 8px 16px;
+    background-color: #3498DB;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn.btn-primary:hover {
+    background-color: #2980B9;
+}
+
+/* Diagnosis result section */
+.diagnosis-result {
+    margin-top: 30px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.diagnosis-result h4 {
+    margin-bottom: 15px;
+    color: #2C3E50;
+}
+
+.diagnosis-result p {
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+.diagnosis-result h5 {
+    margin-top: 20px;
+}
+
+/* Possible diagnosis list */
+.diagnosis-result ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.diagnosis-result ul li {
+    margin-bottom: 10px;
+}
+
+/* Disclaimer styling */
+.disclaimer {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #e74c3c;
+    font-style: italic;
+}
+
+.disclaimer strong {
+    font-weight: bold;
+}
