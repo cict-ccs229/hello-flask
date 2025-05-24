@@ -1,2 +1,8 @@
 flask
 gunicorn==21.2.0
+tensorflow
+pillow
+numpy
+google-generativeai
+python-dotenv
+werkzeug
